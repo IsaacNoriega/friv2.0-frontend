@@ -28,7 +28,7 @@ export const RegisterComponent: React.FC = () => {
                 Friv 2.0
               </h1>
               <p className="text-gray-400 mt-2">
-                Crea tu cuenta para empezar 🚀
+                Crea tu cuenta para empezar 
               </p>
             </div>
 
