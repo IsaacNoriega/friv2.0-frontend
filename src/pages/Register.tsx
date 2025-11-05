@@ -1,9 +1,18 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { User, Mail, Lock, ArrowLeft } from 'lucide-react';
+import { api } from '../services/api';
 
 export const RegisterComponent: React.FC = () => {
+  const navigate = useNavigate();
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
+  });
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-950 via-violet-950 to-fuchsia-950 p-4">
       <motion.div
@@ -32,7 +41,24 @@ export const RegisterComponent: React.FC = () => {
               </p>
             </div>
 
-            <form className="flex flex-col gap-5">
+            <form onSubmit={async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                setError('');
+                try {
+                  await api.register(formData);
+                  navigate('/login');
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : 'Error en el registro');
+                } finally {
+                  setLoading(false);
+                }
+              }} className="flex flex-col gap-5">
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-500 text-sm">
+                  {error}
+                </div>
+              )}
               {/* Campo: Nombre completo */}
               <div>
                 <label className="text-sm text-gray-400 mb-1 block">
@@ -44,6 +70,9 @@ export const RegisterComponent: React.FC = () => {
                     type="text"
                     placeholder="Tu nombre completo"
                     className="w-full pl-10 p-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-400/40"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    required
                   />
                 </div>
               </div>
@@ -59,6 +88,9 @@ export const RegisterComponent: React.FC = () => {
                     type="email"
                     placeholder="usuario@ejemplo.com"
                     className="w-full pl-10 p-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-400/40"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    required
                   />
                 </div>
               </div>
@@ -72,8 +104,11 @@ export const RegisterComponent: React.FC = () => {
                   <Lock className="absolute left-3 top-3 text-gray-500" size={20} />
                   <input
                     type="password"
-                    placeholder="Mínimo 8 caracteres"
+                    placeholder="Tu contraseña"
                     className="w-full pl-10 p-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-400/40"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    required
                   />
                 </div>
               </div>
