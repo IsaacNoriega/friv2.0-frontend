@@ -29,6 +29,20 @@ const getAuthHeaders = () => {
 
 export const api = {
   // Auth endpoints
+  getMe: async () => {
+    const response = await fetch(`${API_URL}/auth/me`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Error al obtener datos del usuario');
+    }
+
+    return response.json();
+  },
+
   login: async (data: LoginData) => {
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',

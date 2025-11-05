@@ -122,20 +122,6 @@ export const RegisterComponent: React.FC = () => {
               </button>
             </form>
 
-            {/* Separador */}
-            <div className="flex items-center text-gray-500 text-sm my-6">
-              <span className="flex-grow border-t border-white/10"></span>
-              <span className="mx-4">o registrarte con</span>
-              <span className="flex-grow border-t border-white/10"></span>
-            </div>
-
-            {/* Botón Google */}
-            <div className="grid grid-cols-1 gap-4">
-              <button className="p-3 font-medium flex items-center justify-center gap-2 border border-white/10 text-white bg-white/5 hover:bg-white/10 rounded-xl transition-colors">
-                <span>Google</span>
-              </button>
-            </div>
-
             <p className="text-center text-sm text-gray-400 mt-6">
               ¿Ya tienes una cuenta?
               <Link

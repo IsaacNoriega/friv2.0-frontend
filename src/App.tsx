@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { LoginComponent } from "./pages/Login";
 import { RegisterComponent } from "./pages/Register";
+import GoogleCallback from "./pages/GoogleCallback";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./pages/Dashboard";
 import Ranking from "./pages/Ranking";
@@ -75,6 +76,7 @@ function App() {
 
         <Route path="/login" element={<LoginComponent onGuest={(u) => setUser(u)} />} />
         <Route path="/register" element={<RegisterComponent />} />
+        <Route path="/auth/callback" element={<GoogleCallback />} />
 
         {/* Protected layout routes (visual-only) */}
         <Route element={<Layout />}> 
