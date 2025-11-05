@@ -14,12 +14,14 @@ export const LoginComponent: React.FC<{ onGuest?: (u: any) => void }> = ({ onGue
     password: '',
   });
 
-  // Redirigir si ya está logueado
+  // Limpiar storage anterior y verificar login
   React.useEffect(() => {
-    if (auth.isLoggedIn()) {
-      navigate('/dashboard');
+    const token = localStorage.getItem('token');
+    if (token) {
+      auth.logout(); // Limpiar cualquier sesión anterior
+      window.location.reload(); // Recargar para limpiar el estado
     }
-  }, [navigate]);
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-950 via-violet-950 to-fuchsia-950 p-4">

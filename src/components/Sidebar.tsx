@@ -1,3 +1,6 @@
+import { auth } from "../utils/auth";
+import { useNavigate } from "react-router-dom";
+
 type View = "login" | "register" | "dashboard" | "ranking" | "score" | "profile" | "guest";
 
 function IconGames(){
@@ -40,6 +43,13 @@ function IconUser(){
 }
 
 export default function Sidebar({ current, onNavigate }: { current: View; onNavigate: (v: View) => void; }) {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    auth.logout();
+    navigate('/login');
+  };
+
   return (
   <aside className="hidden md:flex w-72 bg-linear-to-b from-[#0b1220] to-[#0e1724] p-6 text-slate-100 min-h-screen flex-col border-r-2 border-sky-700/20">
       <div className="flex items-center gap-4 pb-4 border-b border-slate-800 mb-5">
@@ -48,10 +58,12 @@ export default function Sidebar({ current, onNavigate }: { current: View; onNavi
       </div>
 
   <div className="bg-[rgba(255,255,255,0.02)] p-4 rounded-xl mb-6 flex items-center gap-4 border border-sky-600/30 shadow-sm">
-        <div className="w-14 h-14 rounded-lg bg-linear-to-br from-[#8c5bff] to-[#6aa6ff] flex items-center justify-center font-bold text-white text-lg ring-2 ring-sky-500/20">IN</div>
+        <div className="w-14 h-14 rounded-lg bg-linear-to-br from-[#8c5bff] to-[#6aa6ff] flex items-center justify-center font-bold text-white text-lg ring-2 ring-sky-500/20">
+          {auth.getUser()?.username.slice(0, 2).toUpperCase() || 'IN'}
+        </div>
         <div>
-          <div className="font-semibold text-white">Invitado</div>
-          <div className="text-slate-400 text-xs">Modo invitado</div>
+          <div className="font-semibold text-white">{auth.getUser()?.username || 'Invitado'}</div>
+          <div className="text-slate-400 text-xs">{auth.getUser()?.hasPaid ? 'Usuario Premium' : 'Modo Gratuito'}</div>
         </div>
       </div>
 
@@ -78,8 +90,15 @@ export default function Sidebar({ current, onNavigate }: { current: View; onNavi
       </nav>
 
       <div className="mt-auto pt-6">
-        <button className="flex items-center gap-2 text-slate-400 text-sm hover:text-white">
-          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 17l5-5-5-5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-2 text-slate-400 text-sm hover:text-white hover:bg-red-500/10 w-full px-3 py-2 rounded-lg transition-colors"
+        >
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M16 17l5-5-5-5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M21 12H9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
           Cerrar Sesión
         </button>
       </div>

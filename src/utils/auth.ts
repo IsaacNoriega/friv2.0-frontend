@@ -43,6 +43,12 @@ export const auth = {
 
     // Check if user is logged in
     isLoggedIn: () => {
-        return !!auth.getToken() && !!auth.getUser();
+        const token = auth.getToken();
+        const user = auth.getUser();
+        if (!token || !user) {
+            auth.logout(); // Limpia todo si falta alguno
+            return false;
+        }
+        return true;
     }
 };
