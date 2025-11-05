@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import GameInstructions from '../../components/GameInstructions'
 
 type Card = {
   code: string; // e.g. 'A♠' or '10♥'
@@ -156,9 +157,11 @@ export default function Blackjack() {
             <p className="text-sm text-slate-300">Puntuación:</p>
             <p className="text-xl font-bold text-white">{score}</p>
           </div>
-        </header>
+  </header>
 
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <GameInstructions />
+
+  <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-6">
             <h2 className="text-lg font-semibold mb-3">
               Dealer {gameOver ? `(${dealerValue})` : ""}

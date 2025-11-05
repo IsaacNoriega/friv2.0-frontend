@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import GameInstructions from '../../components/GameInstructions'
 
 const ROWS = 6;
 const COLS = 7;
@@ -191,9 +192,11 @@ export default function Connect4() {
               Reiniciar
             </button>
           </div>
-        </header>
+  </header>
 
-        <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4 inline-block">
+  <GameInstructions />
+
+  <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4 inline-block">
           <div
             style={{
               display: "grid",

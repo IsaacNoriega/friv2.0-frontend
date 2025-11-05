@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
+import GameInstructions from '../../components/GameInstructions'
 
 const BASE_MAP = `
 #################
@@ -158,9 +159,11 @@ export default function Pacman() {
             <div>Puntaje: <span className="font-semibold text-white">{score}</span></div>
             <button onClick={restart} className="px-3 py-1 bg-[#0ea5e9] rounded text-black text-sm">Reiniciar</button>
           </div>
-        </header>
+  </header>
 
-        {!started ? (
+  <GameInstructions />
+
+  {!started ? (
           <div className="text-center mt-16">
             <h2 className="text-xl mb-3">Bienvenido a Pacman 🎮</h2>
             {lives === 0 ? <p className="text-slate-400 mb-4">Perdiste todas tus vidas</p> : <p className="text-slate-400 mb-4">Presiona para comenzar</p>}

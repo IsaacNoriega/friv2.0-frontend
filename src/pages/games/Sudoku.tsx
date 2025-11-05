@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import GameInstructions from '../../components/GameInstructions'
 
 const SOLUTIONS: number[][][] = [
   [
@@ -138,6 +139,8 @@ export default function Sudoku() {
         <h1 className="text-3xl font-bold mb-4 text-gradient bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-orange-500">
           🧩 Sudoku
         </h1>
+
+        <GameInstructions />
 
         <p className="mb-2">Nivel: {level}</p>
         <p className="mb-2">Puntaje: {score}</p>

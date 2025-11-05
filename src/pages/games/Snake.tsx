@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import GameInstructions from '../../components/GameInstructions'
 
 const COLS = 20
 const ROWS = 16
@@ -84,9 +85,11 @@ export default function Snake(){
             <div className="text-sm text-slate-300">Puntos: <span className="font-semibold text-white">{score}</span></div>
             <button onClick={reset} className="py-1 px-3 rounded-md bg-linear-to-r from-[#5b34ff] to-[#ff3fb6] text-white text-sm">Reiniciar</button>
           </div>
-        </header>
+  </header>
 
-        <section className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4">
+  <GameInstructions />
+
+  <section className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4">
           <div style={{ gridTemplateColumns: `repeat(${COLS}, 1fr)` }} className="grid gap-0 w-full border border-slate-800 bg-[#071826]">
             {Array.from({ length: ROWS }).map((_, r) => (
               Array.from({ length: COLS }).map((__, c) => {

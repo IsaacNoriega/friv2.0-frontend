@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import GameInstructions from '../../components/GameInstructions'
 
 type Card = {
   id: number;
@@ -160,9 +161,11 @@ export default function MemoramaPorRondas() {
             <div className="text-sm text-slate-300">Movimientos: <span className="font-semibold text-white">{moves}</span></div>
             <div className="text-sm text-slate-300">Tiempo: <span className="font-semibold text-white">{time}s</span></div>
           </div>
-        </header>
+  </header>
 
-        <section className="bg-[#0e1b26] rounded-xl border border-slate-800 p-6">
+  <GameInstructions />
+
+  <section className="bg-[#0e1b26] rounded-xl border border-slate-800 p-6">
           <div className="grid gap-4" style={cols as React.CSSProperties}>
             {cards.map((c, i) => {
               const isFlipped = flipped.includes(i) || c.matched;

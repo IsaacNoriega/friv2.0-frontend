@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import GameInstructions from '../../components/GameInstructions'
 
 type Cell = {
   mine: boolean;
@@ -223,9 +224,11 @@ export default function MinesweeperRondas() {
           <div className="text-sm text-slate-300">
             Puntos: <span className="font-semibold text-white">{score}</span>
           </div>
-        </header>
+  </header>
 
-        <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4 overflow-auto">
+  <GameInstructions />
+
+  <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4 overflow-auto">
           <div
             style={{
               display: "grid",

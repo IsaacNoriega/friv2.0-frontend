@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import GameInstructions from '../../components/GameInstructions'
 
 type Tile = number | null;
 const SIZE = 4;
@@ -65,7 +66,7 @@ function hasMoves(g: Tile[][]) {
 
 export default function Game2048() {
   const [grid, setGrid] = useState<Tile[][]>(() => {
-    let g = spawnTile(spawnTile(emptyGrid()));
+    const g = spawnTile(spawnTile(emptyGrid()));
     return g;
   });
   const [score, setScore] = useState(0);
@@ -153,7 +154,7 @@ export default function Game2048() {
   }, [handleMove]);
 
   function restart() {
-    let g = spawnTile(spawnTile(emptyGrid()));
+    const g = spawnTile(spawnTile(emptyGrid()));
     setGrid(g);
     setScore(0);
     setOver(false);
@@ -201,9 +202,11 @@ export default function Game2048() {
               Nuevo Juego
             </button>
           </div>
-        </header>
+  </header>
 
-        <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4 shadow-lg">
+  <GameInstructions />
+
+  <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4 shadow-lg">
           <div
             className="grid gap-2 transition-all duration-200"
             style={{ gridTemplateColumns: `repeat(${SIZE}, 1fr)` }}

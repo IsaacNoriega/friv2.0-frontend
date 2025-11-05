@@ -1,9 +1,19 @@
 import { useEffect, useState, useRef, useCallback } from "react";
+import GameInstructions from '../../components/GameInstructions'
 
 type Cell = string | null;
 const ROWS = 20;
 const COLS = 10;
 const SPEED = 600;
+
+type Piece = {
+  shape: number[][];
+  r: number;
+  c: number;
+  type: string;
+  rot: number;
+  color: string;
+};
 
 const SHAPES: Record<string, number[][][]> = {
   I: [
@@ -73,7 +83,7 @@ export default function Tetris() {
   } | null>(null);
 
   // 🔹 Verifica si se puede colocar una pieza
-  const canPlace = useCallback((p: any, g: Cell[][], rr = p.r, cc = p.c) => {
+  const canPlace = useCallback((p: Piece, g: Cell[][], rr = p.r, cc = p.c) => {
     for (let y = 0; y < p.shape.length; y++) {
       for (let x = 0; x < p.shape[y].length; x++) {
         if (!p.shape[y][x]) continue;
@@ -234,9 +244,11 @@ export default function Tetris() {
               Restart
             </button>
           </div>
-        </header>
+  </header>
 
-        <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4 overflow-auto">
+  <GameInstructions />
+
+  <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4 overflow-auto">
           <div style={{ width: COLS * 24, background: "#071123", padding: 6 }}>
             <div
               style={{

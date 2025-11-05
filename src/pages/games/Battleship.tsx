@@ -1,6 +1,11 @@
 import React, { useMemo, useState, useCallback } from "react";
+import GameInstructions from '../../components/GameInstructions'
 
 type Cell = { ship: number | null; hit: boolean };
+
+const SIZE = 8;
+const SHIPS = [4, 3, 3, 2, 2];
+const MAX_SHOTS_PER_ROUND = 40;
 
 function makeBoard(size: number) {
   return Array.from({ length: size }, () =>
@@ -32,10 +37,6 @@ function placeShips(size: number, ships: number[]) {
 }
 
 export default function BattleshipRounds() {
-  const SIZE = 8;
-  const SHIPS = [4, 3, 3, 2, 2];
-  const MAX_SHOTS_PER_ROUND = 40;
-
   const [round, setRound] = useState(1);
   const [score, setScore] = useState(0);
   const [shots, setShots] = useState(0);
@@ -55,7 +56,7 @@ export default function BattleshipRounds() {
       }
     }
     let sunkCount = 0;
-    for (const [_, hasUnhit] of shipsAlive) if (!hasUnhit) sunkCount++;
+    for (const hasUnhit of shipsAlive.values()) if (!hasUnhit) sunkCount++;
     return sunkCount;
   }, [board]);
 
@@ -128,9 +129,11 @@ export default function BattleshipRounds() {
               Reiniciar
             </button>
           </div>
-        </header>
+  </header>
 
-        <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-5 inline-block shadow-lg">
+  <GameInstructions />
+
+  <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-5 inline-block shadow-lg">
           <div
             style={{
               display: "grid",

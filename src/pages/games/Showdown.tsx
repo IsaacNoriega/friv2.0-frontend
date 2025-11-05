@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import GameInstructions from '../../components/GameInstructions'
 
 type Phase = 'idle' | 'ready' | 'draw' | 'result'
 
@@ -84,8 +85,9 @@ export default function Showdown(){
   return (
     <main className="p-6 min-h-screen text-slate-100">
       <div className="max-w-xl mx-auto">
-        <h1 className="text-2xl font-semibold mb-4">ShowDown — Duelo de reflejos</h1>
-        <div className="bg-[#071726] rounded-xl p-6 border border-slate-800 text-center">
+  <h1 className="text-2xl font-semibold mb-4">ShowDown — Duelo de reflejos</h1>
+  <GameInstructions />
+  <div className="bg-[#071726] rounded-xl p-6 border border-slate-800 text-center">
           <p className="mb-4">{message}</p>
 
           <div className="flex justify-center gap-4 mb-4">

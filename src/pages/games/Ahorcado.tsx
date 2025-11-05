@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import GameInstructions from '../../components/GameInstructions'
 
 const WORDS = [
   "REACT",
@@ -108,9 +109,11 @@ export default function AhorcadoArcade() {
             <div>Ronda: <span className="text-white font-semibold">{round}</span></div>
             <div>Puntos: <span className="text-white font-semibold">{score}</span></div>
           </div>
-        </header>
+  </header>
 
-        <div className="bg-[#0e1b26] rounded-xl border border-slate-700 p-6 shadow-xl text-center">
+  <GameInstructions />
+
+  <div className="bg-[#0e1b26] rounded-xl border border-slate-700 p-6 shadow-xl text-center">
           <p className="text-slate-300 mb-2">
             Errores: <span className="text-white font-semibold">{wrong}/{MAX_WRONG}</span>
           </p>

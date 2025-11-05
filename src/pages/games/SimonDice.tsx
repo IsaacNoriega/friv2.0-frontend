@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import GameInstructions from '../../components/GameInstructions'
 
 const COLORS = ['green', 'red', 'yellow', 'blue'] as const
 
@@ -97,6 +98,8 @@ export default function SimonDice() {
         <h1 className="text-3xl font-bold mb-4 text-gradient bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500">
           🎵 Simón Dice
         </h1>
+
+        <GameInstructions />
 
         <p className="mb-2">Nivel: {level}</p>
         <p className="mb-2">Puntaje: {score}</p>

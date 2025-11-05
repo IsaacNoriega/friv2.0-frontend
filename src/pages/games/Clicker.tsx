@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import GameInstructions from '../../components/GameInstructions'
 
 type Upgrade = {
   id: string;
@@ -112,9 +113,11 @@ export default function Clicker() {
           >
             Reiniciar
           </button>
-        </header>
+  </header>
 
-        <div className="grid md:grid-cols-2 gap-6">
+  <GameInstructions />
+
+  <div className="grid md:grid-cols-2 gap-6">
           {/* Panel de juego */}
           <div className="bg-[#0e1b26] p-6 rounded-xl border border-slate-800 text-center">
             <div className="text-4xl font-bold mb-2">{score}</div>

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import GameInstructions from '../../components/GameInstructions'
 
 export default function Flappy() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -189,9 +190,11 @@ export default function Flappy() {
               Best: <span className="font-semibold text-white">{best}</span>
             </div>
           </div>
-        </header>
+  </header>
 
-        <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4 relative">
+  <GameInstructions />
+
+  <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4 relative">
           <div style={{ width: "100%", maxWidth: 480, position: "relative" }}>
             <canvas
               ref={canvasRef}
