@@ -1,9 +1,10 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, User } from 'lucide-react';
 
-export const LoginComponent: React.FC = () => {
+export const LoginComponent: React.FC<{ onGuest?: (u: any) => void }> = ({ onGuest }) => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-950 via-violet-950 to-fuchsia-950 p-4">
       <motion.div
@@ -84,7 +85,13 @@ export const LoginComponent: React.FC = () => {
             
 
              
-              <button className="p-3 font-medium flex items-center justify-center gap-2 border border-white/10 text-white bg-white/5 hover:bg-white/10 rounded-xl transition-colors">
+              <button
+                onClick={() => {
+                  onGuest?.({ name: 'Invitado', guest: true });
+                  navigate('/dashboard');
+                }}
+                className="p-3 font-medium flex items-center justify-center gap-2 border border-white/10 text-white bg-white/5 hover:bg-white/10 rounded-xl transition-colors"
+              >
                 <span>Continuar como invitado</span>
               </button>
             </div>
