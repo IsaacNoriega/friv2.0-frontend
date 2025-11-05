@@ -4,12 +4,19 @@ import { useNavigate } from 'react-router-dom'
 const games = [
   { title: 'Memorama', desc: 'Empareja las cartas lo más rápido posible', record: '--', colorFrom: '#ff9a2b', colorTo: '#d85f00', route: '/memorama' },
   { title: 'Black Jack', desc: 'Juega al clásico Black Jack contra el dealer', record: '--', colorFrom: '#1f2937', colorTo: '#111827', route: '/blackjack' },
-  { title: 'Space Invaders', desc: 'Defiende la Tierra de invasores alienígenas', record: '15,420', colorFrom: '#0fb6ff', colorTo: '#0077d6', route: '' },
-  { title: 'Pac Runner', desc: 'Corre por el laberinto y come todas las píldoras', record: '28,900', colorFrom: '#ff9a2b', colorTo: '#d85f00', route: '' },
-  { title: 'Neon Racer', desc: 'Carreras a alta velocidad en la ciudad del futuro', record: '45,670', colorFrom: '#b84bff', colorTo: '#ff2a8a', route: '' },
-  { title: 'Pixel Fighter', desc: 'Combate 1vs1 en el torneo definitivo', record: '12,340', colorFrom: '#f33b45', colorTo: '#c2122d', route: '' },
-  { title: 'Retro Snake', desc: 'La serpiente clásica con un toque moderno', record: '8,920', colorFrom: '#16a34a', colorTo: '#0b8a3a', route: '' },
-  { title: 'Galaxy Shooter', desc: 'Dispara a través del espacio sideral', record: '34,210', colorFrom: '#7c4dff', colorTo: '#5b2bff', route: '' },
+  { title: 'Flappy Bird', desc: 'Evita los obstáculos y mantén al pájaro en vuelo', record: '--', colorFrom: '#06b6d4', colorTo: '#0891b2', route: '/flappy' },
+  { title: '2048', desc: 'Combina fichas y llega a 2048', record: '--', colorFrom: '#f59e0b', colorTo: '#d97706', route: '/2048' },
+  { title: 'Tetris', desc: 'Ordena las piezas para completar líneas', record: '--', colorFrom: '#06b6d4', colorTo: '#7c3aed', route: '/tetris' },
+  { title: 'Pacman', desc: 'Come puntos y evita fantasmas', record: '--', colorFrom: '#f97316', colorTo: '#ef4444', route: '/pacman' },
+  { title: 'Ahorcado', desc: 'Adivina la palabra antes de colgarte', record: '--', colorFrom: '#10b981', colorTo: '#047857', route: '/ahorcado' },
+  { title: 'Buscaminas', desc: 'Encuentra las minas sin explotarlas', record: '--', colorFrom: '#ef4444', colorTo: '#b91c1c', route: '/minesweeper' },
+  { title: 'Snake', desc: 'Crece evitando chocar', record: '--', colorFrom: '#16a34a', colorTo: '#0b8a3a', route: '/snake' },
+  { title: 'Battle Ship', desc: 'Hundir los barcos del oponente (tal vez)', record: '--', colorFrom: '#0ea5e9', colorTo: '#0369a1', route: '/battleship' },
+  { title: 'Conecta 4', desc: 'Conecta 4 fichas en línea', record: '--', colorFrom: '#f97316', colorTo: '#d97706', route: '/connect4' },
+  { title: 'Sudoku', desc: 'Completa la cuadrícula sin repetir números', record: '--', colorFrom: '#7c3aed', colorTo: '#6d28d9', route: '/sudoku' },
+  { title: 'Show Down', desc: 'Minijuego competitivo (placeholder)', record: '--', colorFrom: '#f43f5e', colorTo: '#ef4444', route: '/showdown' },
+  { title: 'Simón dice', desc: 'Repite la secuencia de colores y sonidos', record: '--', colorFrom: '#84cc16', colorTo: '#16a34a', route: '/simondice' },
+  { title: 'Clicker', desc: 'Clickea para ganar puntos', record: '--', colorFrom: '#f59e0b', colorTo: '#f97316', route: '/clicker' },
 ]
 
 export default function Dashboard(){

@@ -9,6 +9,19 @@ import Score from "./pages/Score";
 import Profile from "./pages/Profile";
 import Memorama from "./pages/games/Memorama";
 import Blackjack from "./pages/games/Blackjack";
+import Flappy from "./pages/games/Flappy";
+import Game2048 from "./pages/games/Game2048";
+import Tetris from "./pages/games/Tetris";
+import Pacman from "./pages/games/Pacman";
+import Ahorcado from "./pages/games/Ahorcado";
+import Minesweeper from "./pages/games/Minesweeper";
+import Snake from "./pages/games/Snake";
+import Battleship from "./pages/games/Battleship";
+import Connect4 from "./pages/games/Connect4";
+import Sudoku from "./pages/games/Sudoku";
+import Showdown from "./pages/games/Showdown";
+import SimonDice from "./pages/games/SimonDice";
+import Clicker from "./pages/games/Clicker";
 
 function Layout() {
   const navigate = useNavigate();
@@ -70,6 +83,19 @@ function App() {
           <Route path="/score" element={<Score />} />
           <Route path="/memorama" element={<Memorama />} />
           <Route path="/blackjack" element={<Blackjack />} />
+          <Route path="/flappy" element={<Flappy />} />
+          <Route path="/2048" element={<Game2048 />} />
+          <Route path="/tetris" element={<Tetris />} />
+          <Route path="/pacman" element={<Pacman />} />
+          <Route path="/ahorcado" element={<Ahorcado />} />
+          <Route path="/minesweeper" element={<Minesweeper />} />
+          <Route path="/snake" element={<Snake />} />
+          <Route path="/battleship" element={<Battleship />} />
+          <Route path="/connect4" element={<Connect4 />} />
+          <Route path="/sudoku" element={<Sudoku />} />
+          <Route path="/showdown" element={<Showdown />} />
+          <Route path="/simondice" element={<SimonDice />} />
+          <Route path="/clicker" element={<Clicker />} />
           <Route path="/profile" element={<Profile user={user} onSave={(u)=>{ console.log('profile save', u); }} />} />
         </Route>
 
