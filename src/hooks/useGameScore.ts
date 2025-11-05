@@ -12,10 +12,15 @@ export const useGameScore = ({ gameName }: UseGameScoreProps) => {
   const [bestScore, setBestScore] = useState<number | null>(null);
 
   const submitScore = async (score: number) => {
+    if (!gameName || typeof score !== 'number') {
+      setError('Nombre del juego y puntuación son requeridos');
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
     try {
-      const result = await api.submitScore(gameName, score);
+      const result = await api.postGameScore(gameName, Math.floor(score));
       setLastScore(score);
       setBestScore(result.best);
       return result;

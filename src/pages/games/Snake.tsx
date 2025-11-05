@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import GameInstructions from '../../components/GameInstructions'
 import { EndGameButton } from '../../components/EndGameButton'
+import { useGameScore } from '../../hooks/useGameScore';
 
 const COLS = 20
 const ROWS = 16
@@ -22,7 +23,9 @@ export default function Snake(){
   const [food, setFood] = useState(() => randomFood(INITIAL_SNAKE))
   const [running, setRunning] = useState(true)
   const [score, setScore] = useState(0)
+  const [bestScore, setBestScore] = useState<number | null>(null)
   const speedRef = useRef(140) // ms
+  const { submitScore, isSubmitting } = useGameScore({ gameName: 'snake' });
 
   useEffect(()=>{
     function onKey(e: KeyboardEvent){
@@ -47,8 +50,14 @@ export default function Snake(){
         const ny = (head.y + dirRef.current.y + ROWS) % ROWS
         // collision with self
         if (prev.some(p => p.x === nx && p.y === ny)){
-          setRunning(false)
-          return prev
+          setRunning(false);
+          // Guardar puntuación al perder
+          if (score > 0) {
+            submitScore(score).then(result => {
+              setBestScore(result.best);
+            }).catch(console.error);
+          }
+          return prev;
         }
         const ate = (nx === food.x && ny === food.y)
         const newHead = { x: nx, y: ny }
@@ -62,7 +71,7 @@ export default function Snake(){
       })
     }, speedRef.current)
     return ()=> clearInterval(id)
-  },[running, food])
+  }, [running, food, score, submitScore])
 
   function reset(){
     setSnake(INITIAL_SNAKE)
@@ -84,8 +93,20 @@ export default function Snake(){
 
           <div className="flex items-center gap-3">
             <div className="text-sm text-slate-300">Puntos: <span className="font-semibold text-white">{score}</span></div>
+            {bestScore !== null && (
+              <div className="text-sm text-slate-300">Mejor: <span className="font-semibold text-white">{bestScore}</span></div>
+            )}
             <button onClick={reset} className="py-1 px-3 rounded-md bg-linear-to-r from-[#5b34ff] to-[#ff3fb6] text-white text-sm">Reiniciar</button>
-            <EndGameButton />
+            <EndGameButton onEnd={async () => {
+              if (score > 0) {
+                try {
+                  const result = await submitScore(score);
+                  setBestScore(result.best);
+                } catch (error) {
+                  console.error('Error guardando puntuación:', error);
+                }
+              }
+            }} isSubmitting={isSubmitting} />
           </div>
   </header>
 

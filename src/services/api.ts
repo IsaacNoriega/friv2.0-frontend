@@ -21,9 +21,12 @@ interface UpdateUserData {
 // Helper function to get headers with authorization token
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
+  if (!token) {
+    throw new Error('No token found');
+  }
   return {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
+    'Authorization': `Bearer ${token}`,
   };
 };
 
@@ -128,6 +131,68 @@ export const api = {
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || 'Error eliminando usuario');
+    }
+    
+    return response.json();
+  },
+
+  // Leaderboard endpoints
+  postGameScore: async (gameName: string, score: number) => {
+    if (!gameName) {
+      throw new Error('Nombre del juego es requerido');
+    }
+    
+    // Asegurarse de que score es un número válido
+    const numericScore = Number(score);
+    if (isNaN(numericScore)) {
+      throw new Error('La puntuación debe ser un número válido');
+    }
+
+    // Asegurarse de que el token existe
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Usuario no autenticado');
+    }
+
+    const headers = getAuthHeaders();
+    console.log('Headers:', headers); // Debug
+    console.log('Score:', numericScore, typeof numericScore); // Debug
+
+    const response = await fetch(`${API_URL}/leaderboard/${gameName}/score`, {
+      method: 'POST',
+      headers: {
+        ...headers,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ 
+        score: Math.floor(numericScore),
+        name: gameName 
+      }), 
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log('Error response:', errorText); // Debug
+      try {
+        const error = JSON.parse(errorText);
+        throw new Error(error.message || 'Error guardando puntuación');
+      } catch (e) {
+        throw new Error('Error guardando puntuación');
+      }
+    }
+    
+    return response.json();
+  },
+
+  getGameTop: async (gameName: string, limit: number = 50) => {
+    const response = await fetch(`${API_URL}/leaderboard/${gameName}/top?limit=${limit}`, {
+      headers: getAuthHeaders(),
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Error obteniendo leaderboard');
     }
     
     return response.json();
