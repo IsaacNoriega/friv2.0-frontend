@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import GameInstructions from '../../components/GameInstructions'
+import { EndGameButton } from '../../components/EndGameButton'
 
 const COLS = 20
 const ROWS = 16
@@ -84,6 +85,7 @@ export default function Snake(){
           <div className="flex items-center gap-3">
             <div className="text-sm text-slate-300">Puntos: <span className="font-semibold text-white">{score}</span></div>
             <button onClick={reset} className="py-1 px-3 rounded-md bg-linear-to-r from-[#5b34ff] to-[#ff3fb6] text-white text-sm">Reiniciar</button>
+            <EndGameButton />
           </div>
   </header>
 

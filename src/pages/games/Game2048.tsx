@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
-import GameInstructions from '../../components/GameInstructions'
+import GameInstructions from '../../components/GameInstructions';
+import { EndGameButton } from '../../components/EndGameButton';
 
 type Tile = number | null;
 const SIZE = 4;
@@ -195,6 +196,7 @@ export default function Game2048() {
             <div className="text-sm text-slate-300">
               Best: <span className="font-semibold text-white">{best}</span>
             </div>
+            <EndGameButton />
             <button
               onClick={restart}
               className="px-3 py-1 bg-[#0ea5e9] hover:bg-[#38bdf8] rounded text-black text-sm font-semibold transition"

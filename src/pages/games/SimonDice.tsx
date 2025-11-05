@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import GameInstructions from '../../components/GameInstructions'
+import { EndGameButton } from '../../components/EndGameButton';
 
 const COLORS = ['green', 'red', 'yellow', 'blue'] as const
 
@@ -95,9 +96,12 @@ export default function SimonDice() {
   return (
     <main className="p-6 min-h-screen bg-[#0b1120] text-slate-100 flex flex-col items-center justify-center">
       <div className="max-w-md w-full bg-[#162033] rounded-2xl p-6 border border-slate-700 text-center shadow-lg">
-        <h1 className="text-3xl font-bold mb-4 text-gradient bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500">
-          🎵 Simón Dice
-        </h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-3xl font-bold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500">
+            🎵 Simón Dice
+          </h1>
+          <EndGameButton />
+        </div>
 
         <GameInstructions />
 

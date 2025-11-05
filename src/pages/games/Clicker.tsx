@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import GameInstructions from '../../components/GameInstructions'
+import GameInstructions from '../../components/GameInstructions';
+import { EndGameButton } from '../../components/EndGameButton';
 
 type Upgrade = {
   id: string;
@@ -107,12 +108,15 @@ export default function Clicker() {
               Haz clic para ganar puntos y compra mejoras.
             </p>
           </div>
-          <button
-            onClick={resetGame}
-            className="px-3 py-1 text-sm rounded-md bg-red-600 hover:bg-red-700"
-          >
-            Reiniciar
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={resetGame}
+              className="px-3 py-1 text-sm rounded-md bg-red-600 hover:bg-red-700"
+            >
+              Reiniciar
+            </button>
+            <EndGameButton />
+          </div>
   </header>
 
   <GameInstructions />

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import GameInstructions from '../../components/GameInstructions'
+import GameInstructions from '../../components/GameInstructions';
+import { EndGameButton } from '../../components/EndGameButton';
 
 type Cell = {
   mine: boolean;
@@ -221,8 +222,11 @@ export default function MinesweeperRondas() {
             <h1 className="text-2xl font-semibold">Buscaminas — Ronda {round}</h1>
             <p className="text-slate-400 text-sm">Haz clic para revelar, clic derecho para marcar bandera.</p>
           </div>
-          <div className="text-sm text-slate-300">
-            Puntos: <span className="font-semibold text-white">{score}</span>
+          <div className="flex items-center gap-3">
+            <div className="text-sm text-slate-300">
+              Puntos: <span className="font-semibold text-white">{score}</span>
+            </div>
+            <EndGameButton />
           </div>
   </header>
 

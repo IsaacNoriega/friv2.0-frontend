@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import GameInstructions from '../../components/GameInstructions'
+import { EndGameButton } from '../../components/EndGameButton';
 
 type Cell = string | null;
 const ROWS = 20;
@@ -237,6 +238,7 @@ export default function Tetris() {
             <div className="text-sm text-slate-300">
               Score: <span className="font-semibold text-white">{score}</span>
             </div>
+            <EndGameButton />
             <button
               onClick={restart}
               className="px-3 py-1 bg-[#0ea5e9] rounded text-black text-sm"

@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import GameInstructions from '../../components/GameInstructions'
+import { EndGameButton } from '../../components/EndGameButton';
 
 const BASE_MAP = `
 #################
@@ -157,6 +158,7 @@ export default function Pacman() {
             <div>Ronda: <span className="font-semibold text-white">{round}</span></div>
             <div>Vidas: <span className="font-semibold text-white">{lives}</span></div>
             <div>Puntaje: <span className="font-semibold text-white">{score}</span></div>
+            <EndGameButton />
             <button onClick={restart} className="px-3 py-1 bg-[#0ea5e9] rounded text-black text-sm">Reiniciar</button>
           </div>
   </header>

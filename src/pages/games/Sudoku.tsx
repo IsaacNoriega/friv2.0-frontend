@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import GameInstructions from '../../components/GameInstructions'
+import { EndGameButton } from '../../components/EndGameButton';
 
 const SOLUTIONS: number[][][] = [
   [
@@ -136,9 +137,12 @@ export default function Sudoku() {
   return (
     <main className="p-6 text-slate-100 min-h-screen bg-[#0b1120] flex flex-col items-center justify-center">
       <div className="max-w-3xl w-full bg-[#111c2e] rounded-2xl p-6 border border-slate-700 shadow-lg text-center">
-        <h1 className="text-3xl font-bold mb-4 text-gradient bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-orange-500">
-          🧩 Sudoku
-        </h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-3xl font-bold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-orange-500">
+            🧩 Sudoku
+          </h1>
+          <EndGameButton />
+        </div>
 
         <GameInstructions />
 

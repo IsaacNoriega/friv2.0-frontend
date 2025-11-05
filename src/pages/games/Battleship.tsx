@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useCallback } from "react";
 import GameInstructions from '../../components/GameInstructions'
+import { EndGameButton } from '../../components/EndGameButton';
 
 type Cell = { ship: number | null; hit: boolean };
 
@@ -122,6 +123,7 @@ export default function BattleshipRounds() {
             <div>Puntos: <span className="text-white font-semibold">{score}</span></div>
             <div>Tiros: <span className="text-white font-semibold">{shots}/{MAX_SHOTS_PER_ROUND}</span></div>
             <div>Precisión: <span className="text-white font-semibold">{accuracy}%</span></div>
+            <EndGameButton />
             <button
               onClick={restart}
               className="px-3 py-1 bg-[#0ea5e9] hover:bg-[#0284c7] transition rounded text-black font-semibold"

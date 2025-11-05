@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import GameInstructions from '../../components/GameInstructions'
+import GameInstructions from '../../components/GameInstructions';
+import { EndGameButton } from '../../components/EndGameButton';
 
 type Card = {
   code: string; // e.g. 'A♠' or '10♥'
@@ -153,9 +154,12 @@ export default function Blackjack() {
               Acércate a 21 sin pasarte. Gana rondas y suma puntos.
             </p>
           </div>
-          <div className="text-right">
-            <p className="text-sm text-slate-300">Puntuación:</p>
-            <p className="text-xl font-bold text-white">{score}</p>
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <p className="text-sm text-slate-300">Puntuación:</p>
+              <p className="text-xl font-bold text-white">{score}</p>
+            </div>
+            <EndGameButton />
           </div>
   </header>
 

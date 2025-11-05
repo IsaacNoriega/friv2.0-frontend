@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import GameInstructions from '../../components/GameInstructions'
+import { EndGameButton } from '../../components/EndGameButton';
 
 const WORDS = [
   "REACT",
@@ -105,9 +106,12 @@ export default function AhorcadoArcade() {
               Adivina tantas palabras como puedas.
             </p>
           </div>
-          <div className="text-right text-sm text-slate-300">
-            <div>Ronda: <span className="text-white font-semibold">{round}</span></div>
-            <div>Puntos: <span className="text-white font-semibold">{score}</span></div>
+          <div className="flex items-center gap-3">
+            <div className="text-sm text-slate-300">
+              <div>Ronda: <span className="text-white font-semibold">{round}</span></div>
+              <div>Puntos: <span className="text-white font-semibold">{score}</span></div>
+            </div>
+            <EndGameButton />
           </div>
   </header>
 

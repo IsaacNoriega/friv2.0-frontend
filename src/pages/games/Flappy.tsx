@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import GameInstructions from '../../components/GameInstructions'
+import { EndGameButton } from '../../components/EndGameButton';
 
 export default function Flappy() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -189,6 +190,7 @@ export default function Flappy() {
             <div className="text-sm text-slate-300">
               Best: <span className="font-semibold text-white">{best}</span>
             </div>
+            <EndGameButton />
           </div>
   </header>
 

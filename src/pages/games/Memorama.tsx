@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import GameInstructions from '../../components/GameInstructions'
+import GameInstructions from '../../components/GameInstructions';
+import { EndGameButton } from '../../components/EndGameButton';
 
 type Card = {
   id: number;
@@ -160,6 +161,7 @@ export default function MemoramaPorRondas() {
             <div className="text-sm text-slate-300">Puntaje: <span className="font-bold text-white">{score}</span></div>
             <div className="text-sm text-slate-300">Movimientos: <span className="font-semibold text-white">{moves}</span></div>
             <div className="text-sm text-slate-300">Tiempo: <span className="font-semibold text-white">{time}s</span></div>
+            <EndGameButton />
           </div>
   </header>
 

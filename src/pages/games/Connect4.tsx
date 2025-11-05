@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import GameInstructions from '../../components/GameInstructions'
+import GameInstructions from '../../components/GameInstructions';
+import { EndGameButton } from '../../components/EndGameButton';
 
 const ROWS = 6;
 const COLS = 7;
@@ -176,6 +177,7 @@ export default function Connect4() {
             </p>
           </div>
           <div className="flex gap-3 items-center">
+            <EndGameButton />
             <div className="text-sm">
               🏆 Puntuación: <span className="font-bold">{score}</span>
             </div>
