@@ -1,15 +1,53 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { api } from "../services/api";
+import { auth } from "../utils/auth";
 
-type User = { username: string; email?: string; bio?: string; location?: string; favorite?: string; memberSince?: string } | null;
-export default function Profile({ user, onSave }: { user: User; onSave: (u: unknown)=>void }){
-  const [username, setUsername] = useState(user?.username || "Invitado");
-  const [email, setEmail] = useState(user?.email || "player@friv2.com");
-  const [password, setPassword] = useState('');
+export default function Profile() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
+    hasPaid: false
+  });
 
-  function submit(e: React.FormEvent){
+  useEffect(() => {
+    const userData = auth.getUser();
+    if (!userData) {
+      navigate('/login');
+      return;
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      username: userData.username,
+      email: userData.email
+    }));
+  }, [navigate]);
+
+  async function submit(e: React.FormEvent){
     e.preventDefault();
-    onSave({ username, email, password });
-    alert('Información guardada (visual-only)');
+    setLoading(true);
+    setError('');
+
+    try {
+      const user = auth.getUser();
+      if (!user?.id) {
+        throw new Error('Usuario no encontrado');
+      }
+
+      await api.updateUser(user.id, formData);
+      const updatedUser = await api.getUser(user.id);
+      auth.setUser(updatedUser);
+      setError('¡Información actualizada correctamente!');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error actualizando la información');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -18,10 +56,12 @@ export default function Profile({ user, onSave }: { user: User; onSave: (u: unkn
         {/* Left card */}
         <aside className="lg:col-span-1 bg-[#0f2430] rounded-xl p-6 border border-slate-800">
           <div className="flex flex-col items-center gap-4">
-            <div className="w-32 h-32 rounded-full bg-linear-to-br from-[#7c4dff] to-[#ff6fb5] flex items-center justify-center text-white text-2xl font-bold ring-2 ring-sky-500/20">{(username||'IN').slice(0,2).toUpperCase()}</div>
+            <div className="w-32 h-32 rounded-full bg-linear-to-br from-[#7c4dff] to-[#ff6fb5] flex items-center justify-center text-white text-2xl font-bold ring-2 ring-sky-500/20">
+              {(formData.username || 'IN').slice(0,2).toUpperCase()}
+            </div>
             <div className="text-center">
-              <div className="text-xl font-semibold">{username}</div>
-              <div className="text-amber-300 text-sm">Modo Invitado</div>
+              <div className="text-xl font-semibold">{formData.username}</div>
+              <div className="text-amber-300 text-sm">{formData.hasPaid ? 'Usuario Premium' : 'Modo Gratuito'}</div>
             </div>
 
             <div className="w-full border-t border-slate-800 pt-4 text-sm text-slate-300">
@@ -41,23 +81,50 @@ export default function Profile({ user, onSave }: { user: User; onSave: (u: unkn
           </div>
 
           <form onSubmit={submit} className="space-y-4">
+            {error && (
+              <div className={`p-4 rounded-md ${error.includes('correctamente') ? 'bg-green-500/10 border border-green-500/20 text-green-500' : 'bg-red-500/10 border border-red-500/20 text-red-500'}`}>
+                {error}
+              </div>
+            )}
+
             <div>
               <label className="text-sm text-slate-300">Nombre de Usuario</label>
-              <input value={username} onChange={e=>setUsername(e.target.value)} className="w-full mt-1 p-3 bg-[#08121a] border border-slate-700 rounded-md text-white" />
+              <input 
+                value={formData.username} 
+                onChange={e => setFormData(prev => ({ ...prev, username: e.target.value }))}
+                className="w-full mt-1 p-3 bg-[#08121a] border border-slate-700 rounded-md text-white" 
+              />
             </div>
 
             <div>
               <label className="text-sm text-slate-300">Email</label>
-              <input type="email" value={email} onChange={e=>setEmail(e.target.value)} className="w-full mt-1 p-3 bg-[#08121a] border border-slate-700 rounded-md text-white" />
+              <input 
+                type="email" 
+                value={formData.email} 
+                onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                className="w-full mt-1 p-3 bg-[#08121a] border border-slate-700 rounded-md text-white" 
+              />
             </div>
 
             <div>
-              <label className="text-sm text-slate-300">Contraseña</label>
-              <input type="password" placeholder="Nueva contraseña" value={password} onChange={(e)=>setPassword(e.target.value)} className="w-full mt-1 p-3 bg-[#08121a] border border-slate-700 rounded-md text-white" />
+              <label className="text-sm text-slate-300">Nueva Contraseña</label>
+              <input 
+                type="password" 
+                placeholder="Nueva contraseña" 
+                value={formData.password} 
+                onChange={e => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                className="w-full mt-1 p-3 bg-[#08121a] border border-slate-700 rounded-md text-white" 
+              />
             </div>
 
             <div className="flex justify-end">
-              <button type="submit" className="py-2 px-4 rounded-md bg-linear-to-r from-[#5b34ff] to-[#ff3fb6] text-white font-semibold">Guardar</button>
+                          <button 
+              type="submit" 
+              className="w-full py-3 rounded-md bg-gradient-to-r from-[#5b34ff] to-[#ff3fb6] text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading}
+            >
+              {loading ? 'Guardando...' : 'Guardar Cambios'}
+            </button>
             </div>
           </form>
         </section>

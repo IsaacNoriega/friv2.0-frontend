@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, User } from 'lucide-react';
 import { api } from '../services/api';
+import { auth } from '../utils/auth';
 
 export const LoginComponent: React.FC<{ onGuest?: (u: any) => void }> = ({ onGuest }) => {
   const navigate = useNavigate();
@@ -12,6 +13,14 @@ export const LoginComponent: React.FC<{ onGuest?: (u: any) => void }> = ({ onGue
     email: '',
     password: '',
   });
+
+  // Redirigir si ya está logueado
+  React.useEffect(() => {
+    if (auth.isLoggedIn()) {
+      navigate('/dashboard');
+    }
+  }, [navigate]);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-950 via-violet-950 to-fuchsia-950 p-4">
       <motion.div
@@ -35,8 +44,8 @@ export const LoginComponent: React.FC<{ onGuest?: (u: any) => void }> = ({ onGue
                 setError('');
                 try {
                   const response = await api.login(formData);
-                  if (response.token) {
-                    localStorage.setItem('token', response.token);
+                  if (response.token && response.user) {
+                    auth.setLoginData(response.token, response.user);
                     navigate('/dashboard');
                   }
                 } catch (err) {
@@ -61,7 +70,7 @@ export const LoginComponent: React.FC<{ onGuest?: (u: any) => void }> = ({ onGue
                     placeholder="usuario@ejemplo.com"
                     className="w-full pl-10 p-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-400/40"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                     required
                   />
                 </div>
@@ -78,7 +87,7 @@ export const LoginComponent: React.FC<{ onGuest?: (u: any) => void }> = ({ onGue
                     placeholder="Tu contraseña"
                     className="w-full pl-10 p-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-400/40"
                     value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                     required
                     defaultValue="password"
                   />
