@@ -5,7 +5,7 @@ interface UseGameScoreProps {
   gameName: string;
 }
 
-export const useGameScore = ({ gameName }: UseGameScoreProps) => {
+export const useGameScore = (gameName: string) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastScore, setLastScore] = useState<number | null>(null);

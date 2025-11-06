@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import GameInstructions from '../../components/GameInstructions';
 import { EndGameButton } from '../../components/EndGameButton';
+import { useGameScore } from '../../hooks/useGameScore';
 
 type Card = {
   id: number;
@@ -29,6 +30,7 @@ export default function MemoramaPorRondas() {
   const [time, setTime] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [roundFinished, setRoundFinished] = useState(false);
+  const { submitScore, error: scoreError, bestScore } = useGameScore('memorama');
 
   // Construir mazo según ronda
   function buildDeck(r: number) {
@@ -92,12 +94,20 @@ export default function MemoramaPorRondas() {
 
   // Detectar fin de ronda
   useEffect(() => {
-    if (cards.length > 0 && cards.every((c) => c.matched)) {
+    if (cards.length > 0 && cards.every((c) => c.matched) && !roundFinished) {
+      const roundBonus = 100;
+      setScore(currentScore => currentScore + roundBonus);
       setRoundFinished(true);
       setStartedAt(null);
-      setScore((s) => s + 100);
     }
-  }, [cards]);
+  }, [cards, roundFinished]);
+
+  // Guardar puntuación cuando termina la ronda
+  useEffect(() => {
+    if (roundFinished && score > 0) {
+      submitScore(score).catch(console.error);
+    }
+  }, [roundFinished, score, submitScore]);
 
   // Clic en carta
   function onCardClick(index: number) {
@@ -121,7 +131,7 @@ export default function MemoramaPorRondas() {
         <p className="text-slate-400 mb-6">Avanza por rondas, ¡gana puntos y demuestra tu memoria!</p>
         <button
           onClick={startGame}
-          className="py-3 px-6 rounded-xl bg-gradient-to-r from-[#5b34ff] to-[#ff3fb6] text-white font-semibold"
+          className="py-3 px-6 rounded-xl bg-linear-to-r from-[#5b34ff] to-[#ff3fb6] text-white font-semibold"
         >
           Empezar juego
         </button>
@@ -140,7 +150,7 @@ export default function MemoramaPorRondas() {
             setRound(nextRound);
             startRound(nextRound);
           }}
-          className="py-2 px-5 rounded-lg bg-gradient-to-r from-[#5b34ff] to-[#ff3fb6] text-white font-semibold"
+          className="py-2 px-5 rounded-lg bg-linear-to-r from-[#5b34ff] to-[#ff3fb6] text-white font-semibold"
         >
           Siguiente ronda
         </button>
