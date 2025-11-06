@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import GameInstructions from '../../components/GameInstructions';
 import { EndGameButton } from '../../components/EndGameButton';
+import { useGameScore } from '../../hooks/useGameScore';
 
 type Upgrade = {
   id: string;
@@ -13,9 +14,19 @@ type Upgrade = {
 
 export default function Clicker() {
   const [score, setScore] = useState(0);
+  const [maxScore, setMaxScore] = useState(0);
   const [pointsPerClick, setPointsPerClick] = useState(1);
   const [autoClickers, setAutoClickers] = useState(0);
   const [upgrades, setUpgrades] = useState<Upgrade[]>([]);
+  const { submitScore, error: scoreError, bestScore } = useGameScore('clicker');
+
+  // Actualizar y guardar puntuación máxima cuando cambia el score
+  useEffect(() => {
+    if (score > maxScore) {
+      setMaxScore(score);
+      submitScore(score).catch(console.error);
+    }
+  }, [score, maxScore, submitScore]);
 
   // Cargar progreso guardado
   useEffect(() => {
@@ -92,6 +103,7 @@ export default function Clicker() {
     if (window.confirm("¿Reiniciar el progreso?")) {
       localStorage.clear();
       setScore(0);
+      setMaxScore(0);
       setPointsPerClick(1);
       setAutoClickers(0);
       setUpgrades((prev) => prev.map((u) => ({ ...u, purchased: false })));
@@ -124,10 +136,26 @@ export default function Clicker() {
   <div className="grid md:grid-cols-2 gap-6">
           {/* Panel de juego */}
           <div className="bg-[#0e1b26] p-6 rounded-xl border border-slate-800 text-center">
-            <div className="text-4xl font-bold mb-2">{score}</div>
+            <div className="mb-4">
+              <div className="text-4xl font-bold">{score}</div>
+              <p className="text-slate-400 text-sm">puntuación actual</p>
+            </div>
+            <div className="mb-4">
+              <div className="text-2xl font-bold text-emerald-400">{maxScore}</div>
+              <p className="text-slate-400 text-sm">mejor de la sesión</p>
+            </div>
+            {bestScore != null && bestScore > 0 && (
+              <div className="mb-4">
+                <div className="text-xl font-bold text-yellow-400">{bestScore}</div>
+                <p className="text-slate-400 text-sm">récord global</p>
+              </div>
+            )}
             <p className="text-slate-400 mb-4">
               +{pointsPerClick} por clic {autoClickers > 0 && `• ${autoClickers}/s`}
             </p>
+            {scoreError && (
+              <p className="text-red-500 text-sm mb-2">{scoreError}</p>
+            )}
             <button
               onClick={handleClick}
               className="py-3 px-6 rounded-full bg-gradient-to-r from-[#5b34ff] to-[#ff3fb6] text-white text-lg font-semibold shadow-md hover:scale-105 transition"
