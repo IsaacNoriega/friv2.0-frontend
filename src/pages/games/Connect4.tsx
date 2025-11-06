@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import GameInstructions from '../../components/GameInstructions';
 import { EndGameButton } from '../../components/EndGameButton';
+import { useGameScore } from '../../hooks/useGameScore';
 
 const ROWS = 6;
 const COLS = 7;
@@ -23,15 +24,13 @@ function checkWin(grid: number[][], lastR: number, lastC: number) {
   for (const [dr, dc] of dirs) {
     let count = 1;
     for (let k = 1; k < 4; k++) {
-      const r = lastR + dr * k,
-        c = lastC + dc * k;
+      const r = lastR + dr * k, c = lastC + dc * k;
       if (r < 0 || r >= ROWS || c < 0 || c >= COLS || grid[r][c] !== player)
         break;
       count++;
     }
     for (let k = 1; k < 4; k++) {
-      const r = lastR - dr * k,
-        c = lastC - dc * k;
+      const r = lastR - dr * k, c = lastC - dc * k;
       if (r < 0 || r >= ROWS || c < 0 || c >= COLS || grid[r][c] !== player)
         break;
       count++;
@@ -47,17 +46,14 @@ function getValidMoves(grid: number[][]) {
   ).filter((v) => v !== null) as number[];
 }
 
-// CPU move generator by difficulty
 function getCpuMove(grid: number[][], difficulty: "easy" | "medium" | "hard") {
   const validMoves = getValidMoves(grid);
   if (validMoves.length === 0) return null;
 
-  // Easy: random
   if (difficulty === "easy") {
     return validMoves[Math.floor(Math.random() * validMoves.length)];
   }
 
-  // Medium: try to win or block
   for (const move of validMoves) {
     const sim = grid.map((r) => [...r]);
     for (let r = ROWS - 1; r >= 0; r--) {
@@ -71,14 +67,12 @@ function getCpuMove(grid: number[][], difficulty: "easy" | "medium" | "hard") {
     }
   }
 
-  // Hard: same as medium but prefers center
   if (difficulty === "hard") {
     const center = 3;
     const centerMove = validMoves.includes(center) ? center : null;
     if (centerMove && Math.random() < 0.6) return centerMove;
   }
 
-  // fallback random
   return validMoves[Math.floor(Math.random() * validMoves.length)];
 }
 
@@ -88,10 +82,9 @@ export default function Connect4() {
   const [winner, setWinner] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [round, setRound] = useState(1);
-  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">(
-    "medium"
-  );
+  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
   const [cpuThinking, setCpuThinking] = useState(false);
+  const { submitScore, error: scoreError, bestScore } = useGameScore('connect4');
 
   function drop(col: number, p = player) {
     if (winner || cpuThinking) return;
@@ -103,7 +96,7 @@ export default function Connect4() {
         if (checkWin(g, r, col)) {
           setWinner(p);
         } else if (g.every((row) => row.every((c) => c !== 0))) {
-          setWinner(0); // tie
+          setWinner(0); // empate
         } else {
           setPlayer(p === 1 ? 2 : 1);
         }
@@ -124,36 +117,43 @@ export default function Connect4() {
     }
   }, [player, winner]);
 
-  useEffect(() => {
-    if (winner !== null) {
-      if (winner === 1) {
-        setScore((s) => s + 100);
-      } else if (winner === 0) {
-        setScore((s) => s + 50);
-      }
-
-      // Auto next round (unless lost)
-      if (winner !== 2) {
-        setTimeout(() => nextRound(), 1500);
-      }
-    }
-  }, [winner]);
-
-  function nextRound() {
-    if (winner === 2) {
-      alert("Perdiste 😢 Juego terminado. Puntuación final: " + score);
-      setGrid(emptyBoard());
-      setScore(0);
-      setRound(1);
-      setWinner(null);
-      setPlayer(1);
-      return;
-    }
+  const nextRound = useCallback(() => {
     setGrid(emptyBoard());
     setWinner(null);
     setPlayer(1);
     setRound((r) => r + 1);
-  }
+  }, []);
+
+  useEffect(() => {
+    if (winner === null) return;
+
+    let points = 0;
+    if (winner === 1) {
+      points = difficulty === 'hard' ? 150 : difficulty === 'medium' ? 100 : 50;
+    } else if (winner === 0) {
+      points = difficulty === 'hard' ? 75 : difficulty === 'medium' ? 50 : 25;
+    }
+
+    if (winner === 1 || winner === 0) {
+      setScore(prev => {
+        const newScore = prev + points;
+        if (newScore > (bestScore || 0)) {
+          submitScore(newScore).catch(console.error);
+        }
+        return newScore;
+      });
+
+      // pasar de ronda después de 1.5s
+      const timeout = setTimeout(() => nextRound(), 1500);
+      return () => clearTimeout(timeout);
+
+    } else if (winner === 2) {
+      // si pierde, solo guardar score si es récord
+      if (score > (bestScore || 0)) {
+        submitScore(score).catch(console.error);
+      }
+    }
+  }, [winner]);
 
   return (
     <main className="p-6 text-slate-100 min-h-screen bg-[linear-gradient(180deg,#071123_0%,#071726_100%)]">
@@ -178,8 +178,14 @@ export default function Connect4() {
           </div>
           <div className="flex gap-3 items-center">
             <EndGameButton />
-            <div className="text-sm">
-              🏆 Puntuación: <span className="font-bold">{score}</span>
+            <div className="text-right">
+              <div className="text-sm mb-1">
+                🏆 Puntuación: <span className="font-bold">{score}</span>
+              </div>
+              <div className="text-xs text-slate-400">
+                Récord: <span className="font-bold">{bestScore ?? 0}</span>
+              </div>
+              {scoreError && <div className="text-red-500 text-xs">{scoreError}</div>}
             </div>
             <button
               onClick={() => {
@@ -194,11 +200,11 @@ export default function Connect4() {
               Reiniciar
             </button>
           </div>
-  </header>
+        </header>
 
-  <GameInstructions />
+        <GameInstructions />
 
-  <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4 inline-block">
+        <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4 inline-block">
           <div
             style={{
               display: "grid",
