@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import GameInstructions from '../../components/GameInstructions';
 import { EndGameButton } from '../../components/EndGameButton';
+import { useGameScore } from '../../hooks/useGameScore';
 
 type Card = {
   code: string; // e.g. 'A♠' or '10♥'
@@ -51,6 +52,16 @@ export default function Blackjack() {
   const [message, setMessage] = useState<string>("");
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState<number>(0);
+  const { submitScore, error: scoreError, bestScore } = useGameScore('blackjack');
+
+  // Si gana o empata → inicia siguiente ronda tras 2 seg
+  const nextRound = useCallback(() => {
+    setTimeout(() => {
+      if (!message.includes("Fin del juego")) {
+        newGame();
+      }
+    }, 2000);
+  }, [message]);
 
   // Inicia la primera partida
   useEffect(() => {
@@ -79,12 +90,14 @@ export default function Blackjack() {
       setMessage("¡Blackjack! +100 pts");
       setScore((s) => s + 100);
       setGameOver(true);
+      submitScore(score + 100).catch(console.error);
       nextRound();
     } else if (playerValue > 21) {
       setMessage("Te pasaste. Fin del juego.");
       setGameOver(true);
+      submitScore(score).catch(console.error);
     }
-  }, [playerValue]);
+  }, [playerValue, player.length, nextRound, score, submitScore]);
 
   function playerHit() {
     if (gameOver || deck.length === 0) return;
@@ -113,35 +126,30 @@ export default function Blackjack() {
       setMessage("Dealer se pasó. +100 pts");
       setScore((s) => s + 100);
       setGameOver(true);
+      submitScore(score + 100).catch(console.error);
       nextRound();
     } else if (pv > dv) {
       setMessage("¡Ganaste! +100 pts");
       setScore((s) => s + 100);
       setGameOver(true);
+      submitScore(score + 100).catch(console.error);
       nextRound();
     } else if (pv === dv) {
       setMessage("Empate +50 pts");
       setScore((s) => s + 50);
       setGameOver(true);
+      submitScore(score + 50).catch(console.error);
       nextRound();
     } else {
       setMessage("Perdiste. Fin del juego.");
       setGameOver(true);
+      submitScore(score).catch(console.error);
     }
   }
 
   function playerStand() {
     if (gameOver) return;
     dealerPlayAndResolve();
-  }
-
-  // Si gana o empata → inicia siguiente ronda tras 2 seg
-  function nextRound() {
-    setTimeout(() => {
-      if (!message.includes("Fin del juego")) {
-        newGame();
-      }
-    }, 2000);
   }
 
   return (
@@ -158,6 +166,8 @@ export default function Blackjack() {
             <div className="text-right">
               <p className="text-sm text-slate-300">Puntuación:</p>
               <p className="text-xl font-bold text-white">{score}</p>
+              <p className="text-sm text-slate-400">Mejor: {bestScore}</p>
+              {scoreError && <p className="text-red-500 text-xs">{scoreError}</p>}
             </div>
             <EndGameButton />
           </div>
