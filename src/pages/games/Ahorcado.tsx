@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import GameInstructions from '../../components/GameInstructions'
 import { EndGameButton } from '../../components/EndGameButton';
+import { useGameScore } from '../../hooks/useGameScore';
 
 const WORDS = [
   "REACT",
@@ -33,6 +34,7 @@ export default function AhorcadoArcade() {
   const [score, setScore] = useState(0);
   const [round, setRound] = useState(1);
   const [gameOver, setGameOver] = useState(false);
+  const { submitScore, error: scoreError, bestScore } = useGameScore('ahorcado');
 
   const guess = useCallback(
     (l: string) => {
@@ -71,21 +73,32 @@ export default function AhorcadoArcade() {
   // ✅ Avanzar de ronda si gana
   useEffect(() => {
     if (won && !gameOver) {
+      // Calcular bonus basado en errores
+      const errorPenalty = wrong * 10;
+      const roundBonus = 100;
+      const roundScore = roundBonus - errorPenalty;
+
       const timeout = setTimeout(() => {
-        setScore((s) => s + 100);
+        setScore((s) => s + roundScore);
         setRound((r) => r + 1);
         setWord(pickWord());
         setGuessed(new Set());
         setWrong(0);
+        // Guardar puntuación al ganar la ronda
+        submitScore(score + roundScore).catch(console.error);
       }, 1000);
       return () => clearTimeout(timeout);
     }
-  }, [won, gameOver]);
+  }, [won, gameOver, wrong, score, submitScore]);
 
   // ✅ Terminar juego si pierde
   useEffect(() => {
-    if (lost) setGameOver(true);
-  }, [lost]);
+    if (lost) {
+      setGameOver(true);
+      // Guardar puntuación final cuando pierde
+      submitScore(score).catch(console.error);
+    }
+  }, [lost, score, submitScore]);
 
   const restart = () => {
     setWord(pickWord());
@@ -110,6 +123,8 @@ export default function AhorcadoArcade() {
             <div className="text-sm text-slate-300">
               <div>Ronda: <span className="text-white font-semibold">{round}</span></div>
               <div>Puntos: <span className="text-white font-semibold">{score}</span></div>
+              <div>Mejor: <span className="text-white font-semibold">{bestScore}</span></div>
+              {scoreError && <div className="text-red-500">{scoreError}</div>}
             </div>
             <EndGameButton />
           </div>

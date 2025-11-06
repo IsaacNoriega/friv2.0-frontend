@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import { api } from '../services/api';
 
-interface UseGameScoreProps {
-  gameName: string;
-}
 
 export const useGameScore = (gameName: string) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
