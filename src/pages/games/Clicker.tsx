@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import GameInstructions from '../../components/GameInstructions';
 import { EndGameButton } from '../../components/EndGameButton';
 import { useGameScore } from '../../hooks/useGameScore';
+import { GameScoreDisplay } from '../../components/GameScoreDisplay';
 
 type Upgrade = {
   id: string;
@@ -18,7 +19,7 @@ export default function Clicker() {
   const [pointsPerClick, setPointsPerClick] = useState(1);
   const [autoClickers, setAutoClickers] = useState(0);
   const [upgrades, setUpgrades] = useState<Upgrade[]>([]);
-  const { submitScore, error: scoreError, bestScore } = useGameScore('clicker');
+  const { submitScore, error: scoreError, bestScore, lastScore, isSubmitting } = useGameScore('clicker');
 
   // Actualizar y guardar puntuación máxima cuando cambia el score
   useEffect(() => {
@@ -136,20 +137,15 @@ export default function Clicker() {
   <div className="grid md:grid-cols-2 gap-6">
           {/* Panel de juego */}
           <div className="bg-[#0e1b26] p-6 rounded-xl border border-slate-800 text-center">
-            <div className="mb-4">
-              <div className="text-4xl font-bold">{score}</div>
-              <p className="text-slate-400 text-sm">puntuación actual</p>
-            </div>
-            <div className="mb-4">
-              <div className="text-2xl font-bold text-emerald-400">{maxScore}</div>
-              <p className="text-slate-400 text-sm">mejor de la sesión</p>
-            </div>
-            {bestScore != null && bestScore > 0 && (
-              <div className="mb-4">
-                <div className="text-xl font-bold text-yellow-400">{bestScore}</div>
-                <p className="text-slate-400 text-sm">récord global</p>
-              </div>
-            )}
+            <GameScoreDisplay
+              lastScore={lastScore}
+              bestScore={bestScore}
+              isSubmitting={isSubmitting}
+            />
+            <div className="text-4xl font-bold mt-4">{score}</div>
+            <p className="text-slate-400 text-sm">puntuación actual</p>
+            <div className="text-2xl font-bold text-emerald-400 mt-2">{maxScore}</div>
+            <p className="text-slate-400 text-sm mb-4">mejor de la sesión</p>
             <p className="text-slate-400 mb-4">
               +{pointsPerClick} por clic {autoClickers > 0 && `• ${autoClickers}/s`}
             </p>
