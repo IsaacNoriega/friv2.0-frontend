@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import GameInstructions from '../../components/GameInstructions';
 import { EndGameButton } from '../../components/EndGameButton';
 import { useGameScore } from '../../hooks/useGameScore';
@@ -52,7 +52,7 @@ export default function Blackjack() {
   const [message, setMessage] = useState<string>("");
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState<number>(0);
-  const { submitScore, error: scoreError, bestScore } = useGameScore('blackjack');
+  const { submitScore, error: scoreError, bestScore, lastScore, isSubmitting } = useGameScore('blackjack');
 
   // Si gana o empata → inicia siguiente ronda tras 2 seg
   const nextRound = useCallback(() => {
@@ -166,7 +166,12 @@ export default function Blackjack() {
             <div className="text-right">
               <p className="text-sm text-slate-300">Puntuación:</p>
               <p className="text-xl font-bold text-white">{score}</p>
-              <p className="text-sm text-slate-400">Mejor: {bestScore}</p>
+              {bestScore !== null && (
+                <p className="text-sm text-slate-400">Mejor: {bestScore}</p>
+              )}
+              {lastScore !== null && (
+                <p className="text-sm text-slate-400">Último: {lastScore}</p>
+              )}
               {scoreError && <p className="text-red-500 text-xs">{scoreError}</p>}
             </div>
             <EndGameButton />
