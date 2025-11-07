@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import GameInstructions from '../../components/GameInstructions'
 import { EndGameButton } from '../../components/EndGameButton';
+import { useGameScore } from '../../hooks/useGameScore';
+import { GameScoreDisplay } from '../../components/GameScoreDisplay';
 
 type Cell = string | null;
 const ROWS = 20;
@@ -70,9 +72,15 @@ function cloneGrid(g: Cell[][]) {
 
 export default function Tetris() {
   const [grid, setGrid] = useState<Cell[][]>(() => emptyGrid());
-  const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
+  const [currentScore, setCurrentScore] = useState(0);
   const tickRef = useRef<number | null>(null);
+  
+  const { submitScore, lastScore, bestScore } = useGameScore('tetris');
+
+  useEffect(() => {
+    setCurrentScore(0);
+  }, []);
 
   const pieceRef = useRef<{
     shape: number[][];
@@ -110,10 +118,11 @@ export default function Tetris() {
     const newPiece = { shape, r, c, type: t, rot, color: COLORS[t] };
     if (!canPlace(newPiece, grid)) {
       setGameOver(true);
+      submitScore(currentScore);
       return;
     }
     pieceRef.current = newPiece;
-  }, [grid, canPlace]);
+  }, [grid, canPlace, currentScore, submitScore]);
 
   // 🔹 Fija la pieza al grid
   const lockPiece = useCallback(() => {
@@ -136,7 +145,10 @@ export default function Tetris() {
       }
     }
 
-    if (cleared) setScore((s) => s + cleared * 100);
+    if (cleared) {
+      const points = cleared * 100;
+      setCurrentScore((s) => s + points);
+    }
     setGrid(g);
     pieceRef.current = null;
   }, [grid]);
@@ -202,7 +214,7 @@ export default function Tetris() {
   // 🔹 Reiniciar
   const restart = useCallback(() => {
     setGrid(emptyGrid());
-    setScore(0);
+    setCurrentScore(0);
     setGameOver(false);
     pieceRef.current = null;
     spawn();
@@ -235,9 +247,11 @@ export default function Tetris() {
         <header className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-semibold">Tetris</h1>
           <div className="flex items-center gap-3">
-            <div className="text-sm text-slate-300">
-              Score: <span className="font-semibold text-white">{score}</span>
-            </div>
+            <GameScoreDisplay 
+              currentScore={currentScore}
+              lastScore={lastScore}
+              bestScore={bestScore}
+            />
             <EndGameButton />
             <button
               onClick={restart}
