@@ -23,9 +23,8 @@ export default function Snake(){
   const [food, setFood] = useState(() => randomFood(INITIAL_SNAKE))
   const [running, setRunning] = useState(true)
   const [score, setScore] = useState(0)
-  const [bestScore, setBestScore] = useState<number | null>(null)
   const speedRef = useRef(140) // ms
-  const { submitScore, isSubmitting } = useGameScore({ gameName: 'snake' });
+  const { submitScore, error: scoreError, bestScore: serverBestScore } = useGameScore('snake');
 
   useEffect(()=>{
     function onKey(e: KeyboardEvent){
@@ -51,11 +50,9 @@ export default function Snake(){
         // collision with self
         if (prev.some(p => p.x === nx && p.y === ny)){
           setRunning(false);
-          // Guardar puntuación al perder
-          if (score > 0) {
-            submitScore(score).then(result => {
-              setBestScore(result.best);
-            }).catch(console.error);
+          // Solo enviar puntuación si supera el récord
+          if (score > (serverBestScore || 0)) {
+            submitScore(score).catch(console.error);
           }
           return prev;
         }
@@ -71,7 +68,7 @@ export default function Snake(){
       })
     }, speedRef.current)
     return ()=> clearInterval(id)
-  }, [running, food, score, submitScore])
+  }, [running, food, score, submitScore, serverBestScore])
 
   function reset(){
     setSnake(INITIAL_SNAKE)
@@ -92,21 +89,21 @@ export default function Snake(){
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="text-sm text-slate-300">Puntos: <span className="font-semibold text-white">{score}</span></div>
-            {bestScore !== null && (
-              <div className="text-sm text-slate-300">Mejor: <span className="font-semibold text-white">{bestScore}</span></div>
-            )}
+            <div className="text-right">
+              <div className="text-sm mb-1">
+                🐍 Puntos: <span className="font-bold">{score}</span>
+              </div>
+              <div className="text-xs text-slate-400">
+                Récord: <span className="font-bold">{serverBestScore ?? 0}</span>
+              </div>
+              {scoreError && <div className="text-red-500 text-xs">{scoreError}</div>}
+            </div>
             <button onClick={reset} className="py-1 px-3 rounded-md bg-linear-to-r from-[#5b34ff] to-[#ff3fb6] text-white text-sm">Reiniciar</button>
-            <EndGameButton onEnd={async () => {
-              if (score > 0) {
-                try {
-                  const result = await submitScore(score);
-                  setBestScore(result.best);
-                } catch (error) {
-                  console.error('Error guardando puntuación:', error);
-                }
+            <EndGameButton onEnd={() => {
+              if (score > (serverBestScore || 0)) {
+                submitScore(score).catch(console.error);
               }
-            }} isSubmitting={isSubmitting} />
+            }} />
           </div>
   </header>
 
