@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import GameInstructions from "../../components/GameInstructions";
 import { EndGameButton } from "../../components/EndGameButton";
-// 1. Importa motion y AnimatePresence
+import { useGameScore } from "../../hooks/useGameScore";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Cell = {
@@ -184,6 +184,7 @@ export default function MinesweeperRondas() {
   const [won, setWon] = useState(false);
   const [score, setScore] = useState(0);
   const [started, setStarted] = useState(false);
+  const { submitScore, error: scoreError, bestScore } = useGameScore('minesweeper');
 
   const [rows, cols, mines] = (() => {
     const base = 6 + round;
@@ -203,9 +204,15 @@ export default function MinesweeperRondas() {
     const minesCount = board.flat().filter((c) => c.mine).length;
     if (!lost && revealed + minesCount === total) {
       setWon(true);
-      setScore((s) => s + 100);
+      setScore((prevScore) => {
+        const newScore = prevScore + (100 * round); // Más puntos por ronda más alta
+        if (newScore > (bestScore || 0)) {
+          submitScore(newScore).catch(console.error);
+        }
+        return newScore;
+      });
     }
-  }, [board, lost, started, rows, cols]);
+  }, [board, lost, started, rows, cols, round, submitScore, bestScore]);
 
   function reset() {
     setBoard(makeBoard(rows, cols, mines));
@@ -222,7 +229,13 @@ export default function MinesweeperRondas() {
       cell.revealed = true;
       setBoard(b);
       setLost(true);
-      setScore((s) => Math.max(0, s - 50));
+      setScore((prevScore) => {
+        const finalScore = Math.max(0, prevScore);
+        if (finalScore > (bestScore || 0)) {
+          submitScore(finalScore).catch(console.error);
+        }
+        return finalScore;
+      });
       return;
     }
     floodReveal(b, r, c);
@@ -327,8 +340,14 @@ function toggleFlag(e: React.MouseEvent, r: number, c: number) {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="text-sm text-slate-300">
-              Puntos: <span className="font-semibold text-white">{score}</span>
+            <div className="text-right">
+              <div className="text-sm mb-1">
+                🎯 Puntos: <span className="font-bold">{score}</span>
+              </div>
+              <div className="text-xs text-slate-400">
+                Récord: <span className="font-bold">{bestScore ?? 0}</span>
+              </div>
+              {scoreError && <div className="text-red-500 text-xs">{scoreError}</div>}
             </div>
             <EndGameButton />
           </div>
