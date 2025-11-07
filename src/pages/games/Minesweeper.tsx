@@ -11,7 +11,7 @@ type Cell = {
   adj: number;
 };
 
-// --- Lógica del juego (sin cambios) ---
+// --- Lógica del juego ---
 function makeBoard(rows: number, cols: number, mines: number) {
   const board: Cell[][] = Array.from({ length: rows }, () =>
     Array.from({ length: cols }, () => ({
@@ -19,7 +19,7 @@ function makeBoard(rows: number, cols: number, mines: number) {
       revealed: false,
       flagged: false,
       adj: 0,
-    })),
+    }))
   );
 
   let placed = 0;
@@ -86,13 +86,11 @@ function floodReveal(board: Cell[][], r: number, c: number) {
     }
   }
 }
-// --- Fin de la lógica del juego ---
 
-// 2. Constantes para el tamaño del tablero
-const CELL_SIZE = 36; // px - ¡Más grande!
-const GAP_SIZE = 6; // px
+// --- UI helpers ---
+const CELL_SIZE = 36;
+const GAP_SIZE = 6;
 
-// 3. Helper para los colores de los números
 function getNumberColor(num: number): string {
   switch (num) {
     case 1: return "text-blue-400";
@@ -107,7 +105,6 @@ function getNumberColor(num: number): string {
   }
 }
 
-// 4. Componente de Celda individual (con animaciones y memo)
 interface CellComponentProps {
   cell: Cell;
   onClick: () => void;
@@ -124,7 +121,7 @@ const CellComponent = ({ cell, onClick, onContextMenu }: CellComponentProps) => 
       content = "💣";
       bgClass = "bg-red-600";
     } else {
-      bgClass = "bg-[#10232b]"; // Revelada
+      bgClass = "bg-[#10232b]";
       if (cell.adj > 0) {
         content = cell.adj;
         textClass = getNumberColor(cell.adj);
@@ -132,9 +129,9 @@ const CellComponent = ({ cell, onClick, onContextMenu }: CellComponentProps) => 
     }
   } else if (cell.flagged) {
     content = "🚩";
-    bgClass = "bg-[#1a2b3a]"; // Con bandera
+    bgClass = "bg-[#1a2b3a]";
   } else {
-    bgClass = "bg-[#0b1220] hover:bg-[#1a2b3a]"; // Oculta
+    bgClass = "bg-[#0b1220] hover:bg-[#1a2b3a]";
   }
 
   return (
@@ -142,21 +139,17 @@ const CellComponent = ({ cell, onClick, onContextMenu }: CellComponentProps) => 
       key={`${cell.revealed}-${cell.flagged}`}
       onClick={onClick}
       onContextMenu={onContextMenu}
-      // Animaciones de hover y tap
       whileHover={{ scale: 1.1, zIndex: 10 }}
       whileTap={{ scale: 0.9 }}
-      // Estilos con Tailwind y tamaño de celda
       className={`flex items-center justify-center font-bold text-lg rounded-lg transition-colors duration-150 ${bgClass} ${textClass}`}
       style={{
         width: CELL_SIZE,
         height: CELL_SIZE,
       }}
     >
-      {/* AnimatePresence permite animar la entrada/salida del contenido */}
       <AnimatePresence>
         {content !== null && (
           <motion.span
-            // Usamos el contenido como "key" para que sepa cuándo cambiar
             key={content}
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -172,11 +165,8 @@ const CellComponent = ({ cell, onClick, onContextMenu }: CellComponentProps) => 
   );
 };
 
-// 5. Usamos React.memo para optimizar.
-// Solo se re-renderiza la celda si sus props (cell, onClick) cambian.
 const MemoCell = React.memo(CellComponent);
 
-// 6. Componente principal del juego
 export default function MinesweeperRondas() {
   const [round, setRound] = useState(1);
   const [board, setBoard] = useState<Cell[][]>([]);
@@ -184,7 +174,7 @@ export default function MinesweeperRondas() {
   const [won, setWon] = useState(false);
   const [score, setScore] = useState(0);
   const [started, setStarted] = useState(false);
-  const { submitScore, error: scoreError, bestScore } = useGameScore('minesweeper');
+  const { submitScore, error: scoreError, bestScore } = useGameScore("minesweeper");
 
   const [rows, cols, mines] = (() => {
     const base = 6 + round;
@@ -194,25 +184,33 @@ export default function MinesweeperRondas() {
 
   useEffect(() => {
     if (started) reset();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [round]);
 
+  // ✅ Detecta victoria (NO sube score aquí)
   useEffect(() => {
-    if (!started) return;
+    if (!started || lost || won) return;
+
     const total = rows * cols;
     const revealed = board.flat().filter((c) => c.revealed).length;
     const minesCount = board.flat().filter((c) => c.mine).length;
-    if (!lost && revealed + minesCount === total) {
+
+    if (revealed + minesCount === total) {
       setWon(true);
-      setScore((prevScore) => {
-        const newScore = prevScore + (100 * round); // Más puntos por ronda más alta
-        if (newScore > (bestScore || 0)) {
-          submitScore(newScore).catch(console.error);
-        }
-        return newScore;
-      });
     }
-  }, [board, lost, started, rows, cols, round, submitScore, bestScore]);
+  }, [board, lost, started, rows, cols, won]);
+
+  // ✅ Solo suma score UNA VEZ cuando won cambia a true
+  useEffect(() => {
+    if (!won) return;
+
+    setScore((prevScore) => {
+      const newScore = prevScore + (100 * round);
+      if (newScore > (bestScore || 0)) {
+        submitScore(newScore).catch(console.error);
+      }
+      return newScore;
+    });
+  }, [won]);
 
   function reset() {
     setBoard(makeBoard(rows, cols, mines));
@@ -229,32 +227,23 @@ export default function MinesweeperRondas() {
       cell.revealed = true;
       setBoard(b);
       setLost(true);
-      setScore((prevScore) => {
-        const finalScore = Math.max(0, prevScore);
-        if (finalScore > (bestScore || 0)) {
-          submitScore(finalScore).catch(console.error);
-        }
-        return finalScore;
-      });
       return;
     }
     floodReveal(b, r, c);
     setBoard(b);
   }
 
-function toggleFlag(e: React.MouseEvent, r: number, c: number) {
-  e.preventDefault();
-  if (lost || won) return;
-  // Usamos un "updater function" para garantizar el estado más reciente
-  setBoard((currentBoard) => {
-    const b = currentBoard.map((row) => row.map((cell) => ({ ...cell })));
-    const cell = b[r][c];
-    if (cell.revealed) return currentBoard; // No hacer nada si ya está revelada
-    cell.flagged = !cell.flagged;
-    return b;
-  });
-}
-
+  function toggleFlag(e: React.MouseEvent, r: number, c: number) {
+    e.preventDefault();
+    if (lost || won) return;
+    setBoard((currentBoard) => {
+      const b = currentBoard.map((row) => row.map((cell) => ({ ...cell })));
+      const cell = b[r][c];
+      if (cell.revealed) return currentBoard;
+      cell.flagged = !cell.flagged;
+      return b;
+    });
+  }
 
   // ---- Pantalla de inicio ----
   if (!started) {
@@ -328,7 +317,6 @@ function toggleFlag(e: React.MouseEvent, r: number, c: number) {
   // ---- Juego activo ----
   return (
     <main className="p-6 min-h-screen bg-[linear-gradient(180deg,#071123_0%,#071726_100%)] text-white">
-      {/* 7. Contenedor más grande */}
       <div className="max-w-3xl mx-auto">
         <header className="flex items-center justify-between mb-4">
           <div>
@@ -347,7 +335,9 @@ function toggleFlag(e: React.MouseEvent, r: number, c: number) {
               <div className="text-xs text-slate-400">
                 Récord: <span className="font-bold">{bestScore ?? 0}</span>
               </div>
-              {scoreError && <div className="text-red-500 text-xs">{scoreError}</div>}
+              {scoreError && (
+                <div className="text-red-500 text-xs">{scoreError}</div>
+              )}
             </div>
             <EndGameButton />
           </div>
@@ -355,18 +345,15 @@ function toggleFlag(e: React.MouseEvent, r: number, c: number) {
 
         <GameInstructions />
 
-        {/* 8. Tablero con padding y estilos actualizados */}
         <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-6 overflow-auto">
           <div
             style={{
               display: "grid",
               gridTemplateColumns: `repeat(${cols}, ${CELL_SIZE}px)`,
               gap: GAP_SIZE,
-              // Centramos el grid si no ocupa todo el ancho
               justifyContent: "center",
             }}
           >
-            {/* 9. Usamos el nuevo MemoCell */}
             {board.flat().map((cell, i) => {
               const r = Math.floor(i / cols);
               const c = i % cols;

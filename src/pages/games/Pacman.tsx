@@ -1,6 +1,7 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import GameInstructions from '../../components/GameInstructions'
 import { EndGameButton } from '../../components/EndGameButton';
+import { useGameScore } from '../../hooks/useGameScore';
 
 const BASE_MAP = `
 #################
@@ -34,8 +35,9 @@ export default function Pacman() {
   const [score, setScore] = useState(0)
   const [round, setRound] = useState(1)
   const [ghostSpeed, setGhostSpeed] = useState(500)
+  const { submitScore, error: scoreError, bestScore } = useGameScore('pacman')
 
-  // Contar los puntos
+  // 🔹 contar puntos restantes
   useEffect(() => {
     let n = 0
     for (const row of grid)
@@ -44,7 +46,7 @@ export default function Pacman() {
     setDots(n)
   }, [grid])
 
-  // Movimiento del Pacman
+  // 🔹 movimiento del Pacman
   useEffect(() => {
     if (!started || win) return
     function onKey(e: KeyboardEvent) {
@@ -57,8 +59,10 @@ export default function Pacman() {
       const dir = moves[e.key]
       if (!dir) return
       e.preventDefault()
+
       const nr = pos.r + dir[0],
         nc = pos.c + dir[1]
+
       if (grid[nr] && grid[nr][nc] !== '#') {
         setPos({ r: nr, c: nc })
         setGrid((g) => {
@@ -71,11 +75,12 @@ export default function Pacman() {
         })
       }
     }
+
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [pos, grid, win, started])
 
-  // Movimiento del fantasma
+  // 🔹 movimiento del fantasma
   useEffect(() => {
     if (!started) return
     const id = setInterval(() => {
@@ -90,40 +95,66 @@ export default function Pacman() {
       const cand = dirs
         .map((d) => ({ r: g.r + d[0], c: g.c + d[1] }))
         .filter((p) => grid[p.r] && grid[p.r][p.c] !== '#')
+
       if (cand.length) {
-        const pick = cand[Math.floor(Math.random() * cand.length)]
-        ghostRef.current = pick
+        ghostRef.current = cand[Math.floor(Math.random() * cand.length)]
       }
     }, ghostSpeed)
+
     return () => clearInterval(id)
   }, [grid, started, ghostSpeed])
 
-  // Colisiones y victoria
+  // ✅ SOLO guarda score si es récord
+  const handleScoreSubmit = useCallback((scoreToSubmit: number) => {
+    if (scoreToSubmit > (bestScore || 0)) {
+      submitScore(scoreToSubmit).catch(console.error)
+    }
+  }, [bestScore, submitScore])
+
+  // 🔹 detectar colisiones con fantasma
   useEffect(() => {
     if (!started) return
+
     const g = ghostRef.current
     if (g.r === pos.r && g.c === pos.c) {
       setLives((l) => {
         if (l <= 1) {
           setStarted(false)
           setWin(false)
+          handleScoreSubmit(score)
           return 0
-        } else {
-          setPos({ r: 1, c: 1 })
-          return l - 1
         }
+        setPos({ r: 1, c: 1 })
+        return l - 1
       })
     }
-    if (dots === 0 && started) {
+  }, [tick, pos, started, score, handleScoreSubmit])
+
+  // ✅ detectar cuando gana (pero sin sumar score aquí)
+  useEffect(() => {
+    if (started && dots === 0 && !win) {
       setWin(true)
-      setScore((s) => s + 100)
-      setTimeout(() => nextRound(), 1500)
     }
-  }, [tick, pos, dots, started])
+  }, [dots, started, win])
+
+  // ✅ sumar score SOLO UNA VEZ cuando win cambia a true
+  useEffect(() => {
+    if (!win) return
+
+    const roundBonus = 100 * round
+
+    setScore((prev) => {
+      const newScore = prev + roundBonus
+      handleScoreSubmit(newScore)
+      return newScore
+    })
+
+    setTimeout(() => nextRound(), 1500)
+  }, [win])
 
   function nextRound() {
     setRound((r) => r + 1)
-    setGhostSpeed((s) => Math.max(200, s - 50)) // el fantasma se vuelve más rápido
+    setGhostSpeed((s) => Math.max(200, s - 50))
     ghostRef.current = { r: 9, c: 15 }
     setGrid(parseMap())
     setPos({ r: 1, c: 1 })
@@ -154,18 +185,29 @@ export default function Pacman() {
             <h1 className="text-2xl font-semibold">Pacman</h1>
             <p className="text-slate-400 text-sm">Flechas para mover. Evita al fantasma.</p>
           </div>
+
           <div className="flex items-center gap-3 text-sm">
             <div>Ronda: <span className="font-semibold text-white">{round}</span></div>
             <div>Vidas: <span className="font-semibold text-white">{lives}</span></div>
-            <div>Puntaje: <span className="font-semibold text-white">{score}</span></div>
+
+            <div className="text-right">
+              <div className="text-sm mb-1">
+                🎮 Puntos: <span className="font-bold">{score}</span>
+              </div>
+              <div className="text-xs text-slate-400">
+                Récord: <span className="font-bold">{bestScore ?? 0}</span>
+              </div>
+              {scoreError && <div className="text-red-500 text-xs">{scoreError}</div>}
+            </div>
+
             <EndGameButton />
             <button onClick={restart} className="px-3 py-1 bg-[#0ea5e9] rounded text-black text-sm">Reiniciar</button>
           </div>
-  </header>
+        </header>
 
-  <GameInstructions />
+        <GameInstructions />
 
-  {!started ? (
+        {!started ? (
           <div className="text-center mt-16">
             <h2 className="text-xl mb-3">Bienvenido a Pacman 🎮</h2>
             {lives === 0 ? <p className="text-slate-400 mb-4">Perdiste todas tus vidas</p> : <p className="text-slate-400 mb-4">Presiona para comenzar</p>}
