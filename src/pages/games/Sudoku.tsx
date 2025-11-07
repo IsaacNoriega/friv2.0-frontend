@@ -37,7 +37,7 @@ function cloneGrid(g: number[][]) {
 function findConflicts(grid: number[][]) {
   const conflicts = new Set<string>()
 
-  // rows
+  // filas
   for (let r = 0; r < 9; r++) {
     const seen = new Map<number, number[]>()
     for (let c = 0; c < 9; c++) {
@@ -51,7 +51,7 @@ function findConflicts(grid: number[][]) {
         for (const c of cols) conflicts.add(`${r},${c}`)
   }
 
-  // cols
+  // columnas
   for (let c = 0; c < 9; c++) {
     const seen = new Map<number, number[]>()
     for (let r = 0; r < 9; r++) {
@@ -65,7 +65,7 @@ function findConflicts(grid: number[][]) {
         for (const r of rows) conflicts.add(`${r},${c}`)
   }
 
-  // boxes
+  // cajas 3x3
   for (let br = 0; br < 3; br++)
     for (let bc = 0; bc < 3; bc++) {
       const seen = new Map<number, [number, number][]>()
@@ -94,6 +94,7 @@ export default function Sudoku() {
   const [level, setLevel] = useState(1)
   const [won, setWon] = useState(false)
   const [started, setStarted] = useState(false)
+  const [selectedNumber, setSelectedNumber] = useState<number | null>(null)
 
   useEffect(() => {
     if (won && score > best) {
@@ -108,11 +109,13 @@ export default function Sudoku() {
     const g = cloneGrid(grid)
     g[r][c] = n
     setGrid(g)
+    setSelectedNumber(n || null)
   }
 
   function check() {
     const conf = findConflicts(grid)
     setConflicts(conf)
+
     const allFilled = grid.flat().every(v => v > 0)
     if (conf.size === 0 && allFilled) {
       setWon(true)
@@ -146,9 +149,9 @@ export default function Sudoku() {
 
         <GameInstructions />
 
-        <p className="mb-2">Nivel: {level}</p>
-        <p className="mb-2">Puntaje: {score}</p>
-        <p className="mb-4">Mejor: {best}</p>
+        <p>Nivel: {level}</p>
+        <p>Puntaje: {score}</p>
+        <p className="mb-4">Mejor puntaje: {best}</p>
 
         {!started && !won && (
           <button
@@ -161,23 +164,41 @@ export default function Sudoku() {
 
         {started && !won && (
           <>
-            <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4 inline-block mb-4">
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(9,40px)', gap: 6 }}>
+            <div className="bg-[#0e1b26] rounded-xl p-4 inline-block mb-4">
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(9, 48px)"
+                }}
+              >
                 {grid.flat().map((v, i) => {
                   const r = Math.floor(i / 9)
                   const c = i % 9
-                  const fixed = PUZZLES[level - 1][r][c] !== 0
                   const key = `${r},${c}`
+                  const fixed = PUZZLES[level - 1][r][c] !== 0
                   const isConf = conflicts.has(key)
+                  const isSame = selectedNumber !== null && v === selectedNumber
+
                   return (
                     <input
                       key={key}
-                      value={v === 0 ? '' : String(v)}
-                      onChange={e => onChange(r, c, e.target.value)}
+                      value={v === 0 ? "" : String(v)}
+                      onFocus={() => setSelectedNumber(v || null)}
+                      onChange={(e) => onChange(r, c, e.target.value)}
                       disabled={fixed}
-                      className={`w-10 h-10 text-center font-semibold rounded transition-all ${
-                        fixed ? 'bg-slate-700' : 'bg-[#071f2f]'
-                      } ${isConf ? 'ring-2 ring-red-500' : ''}`}
+                      className={`w-12 h-12 text-center text-lg font-bold rounded
+                        transition-all outline-none
+                        ${fixed ? "bg-slate-700" : "bg-[#071f2f]"}
+                        ${isSame && !isConf ? "bg-yellow-600" : ""}
+                        ${isConf ? "ring-2 ring-red-500" : ""}
+                      `}
+                      style={{
+                        border: "1px solid #334155",
+                        borderTopWidth: r % 3 === 0 ? "3px" : "1px",
+                        borderLeftWidth: c % 3 === 0 ? "3px" : "1px",
+                        borderBottomWidth: r === 8 ? "3px" : undefined,
+                        borderRightWidth: c === 8 ? "3px" : undefined,
+                      }}
                     />
                   )
                 })}
@@ -201,7 +222,6 @@ export default function Sudoku() {
         {won && (
           <div className="mt-6">
             <h2 className="text-2xl font-bold text-green-400 mb-2">🎉 ¡Ganaste!</h2>
-            <p className="mb-4">Has completado el Sudoku correctamente.</p>
             <button
               onClick={restart}
               className="px-6 py-2 bg-purple-500 hover:bg-purple-400 text-black rounded-md font-semibold transition"
