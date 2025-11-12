@@ -1,6 +1,7 @@
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useMemo, useState, useCallback, useEffect } from "react";
 import GameInstructions from '../../components/GameInstructions'
 import { EndGameButton } from '../../components/EndGameButton';
+import { useGameScore } from '../../hooks/useGameScore';
 
 type Cell = { ship: number | null; hit: boolean };
 
@@ -44,6 +45,8 @@ export default function BattleshipRounds() {
   const [hits, setHits] = useState(0);
   const [board, setBoard] = useState<Cell[][]>(() => placeShips(SIZE, SHIPS));
   const [gameOver, setGameOver] = useState(false);
+
+  const { submitScore } = useGameScore('battleship');
 
   const sunk = useMemo(() => {
     const shipsAlive = new Map<number, boolean>();
@@ -109,6 +112,14 @@ export default function BattleshipRounds() {
     setRound(1);
     setGameOver(false);
   }, []);
+
+  // Enviar puntuación al servidor cuando se acaba el juego
+  useEffect(() => {
+    if (gameOver) {
+      // fire-and-forget, evitar errores no manejados
+      submitScore(score).catch(() => {});
+    }
+  }, [gameOver, score, submitScore]);
 
   return (
     <main className="p-6 text-slate-100 min-h-screen bg-slate-900 flex flex-col items-center justify-center">

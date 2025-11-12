@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import GameInstructions from '../../components/GameInstructions';
 import { EndGameButton } from '../../components/EndGameButton';
+import { useGameScore } from '../../hooks/useGameScore';
 
 type Tile = number | null;
 const SIZE = 4;
@@ -75,6 +76,7 @@ export default function Game2048() {
     () => Number(localStorage.getItem("best2048")) || 0
   );
   const [over, setOver] = useState(false);
+  const { submitScore } = useGameScore('2048');
 
   const handleMove = useCallback(
     (key: string) => {
@@ -106,13 +108,15 @@ export default function Game2048() {
             setBest(newScore);
             localStorage.setItem("best2048", String(newScore));
           }
+          if (!hasMoves(withSpawn)) {
+            setOver(true);
+            submitScore(newScore).catch(() => {});
+          }
           return newScore;
         });
-
-        if (!hasMoves(withSpawn)) setOver(true);
       }
     },
-    [grid, best]
+    [grid, best, submitScore]
   );
 
   useEffect(() => {

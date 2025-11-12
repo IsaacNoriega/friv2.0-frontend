@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import GameInstructions from '../../components/GameInstructions'
 import { EndGameButton } from '../../components/EndGameButton';
+import { useGameScore } from '../../hooks/useGameScore';
 
 export default function Flappy() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -10,6 +11,7 @@ export default function Flappy() {
   );
   const [running, setRunning] = useState(false);
   const [gameOver, setGameOver] = useState(false);
+  const { submitScore } = useGameScore('flappy');
 
   useEffect(() => {
     if (!running) return;
@@ -109,6 +111,8 @@ export default function Flappy() {
           return nb;
         });
         setGameOver(true);
+        // enviar puntuación final
+        submitScore(internalScore).catch(() => {});
         setRunning(false);
       }
     }
@@ -171,7 +175,7 @@ export default function Flappy() {
       window.removeEventListener("keydown", onKey);
       canvas.removeEventListener("click", onClick);
     };
-  }, [running]);
+  }, [running, best, submitScore]);
 
   return (
     <main className="p-6 text-slate-100 min-h-screen bg-[#071123]">

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import GameInstructions from '../../components/GameInstructions'
 import { EndGameButton } from '../../components/EndGameButton';
+import { useGameScore } from '../../hooks/useGameScore';
 
 const COLORS = ['green', 'red', 'yellow', 'blue'] as const
 
@@ -19,6 +20,7 @@ export default function SimonDice() {
   const [started, setStarted] = useState(false)
   const timeoutRef = useRef<number | null>(null)
   const bestRef = useRef<number>(Number(localStorage.getItem('simon-best') || '0'))
+  const { submitScore } = useGameScore('simon')
 
   useEffect(() => {
     return () => {
@@ -61,6 +63,8 @@ export default function SimonDice() {
         bestRef.current = score
         localStorage.setItem('simon-best', String(score))
       }
+      // enviar puntuación
+      submitScore(score).catch(() => {})
       return
     }
 
