@@ -84,6 +84,7 @@ export default function Connect4() {
   const [round, setRound] = useState(1);
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
   const [cpuThinking, setCpuThinking] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false); // pre-pantalla
   const { submitScore, error: scoreError, bestScore } = useGameScore('connect4');
 
   function drop(col: number, p = player) {
@@ -93,13 +94,9 @@ export default function Connect4() {
       if (g[r][col] === 0) {
         g[r][col] = p;
         setGrid(g);
-        if (checkWin(g, r, col)) {
-          setWinner(p);
-        } else if (g.every((row) => row.every((c) => c !== 0))) {
-          setWinner(0); // empate
-        } else {
-          setPlayer(p === 1 ? 2 : 1);
-        }
+        if (checkWin(g, r, col)) setWinner(p);
+        else if (g.every((row) => row.every((c) => c !== 0))) setWinner(0); // empate
+        else setPlayer(p === 1 ? 2 : 1);
         return;
       }
     }
@@ -128,32 +125,39 @@ export default function Connect4() {
     if (winner === null) return;
 
     let points = 0;
-    if (winner === 1) {
-      points = difficulty === 'hard' ? 150 : difficulty === 'medium' ? 100 : 50;
-    } else if (winner === 0) {
-      points = difficulty === 'hard' ? 75 : difficulty === 'medium' ? 50 : 25;
-    }
+    if (winner === 1) points = difficulty === 'hard' ? 150 : difficulty === 'medium' ? 100 : 50;
+    else if (winner === 0) points = difficulty === 'hard' ? 75 : difficulty === 'medium' ? 50 : 25;
 
     if (winner === 1 || winner === 0) {
       setScore(prev => {
         const newScore = prev + points;
-        if (newScore > (bestScore || 0)) {
-          submitScore(newScore).catch(console.error);
-        }
+        if (newScore > (bestScore || 0)) submitScore(newScore).catch(console.error);
         return newScore;
       });
 
-      // pasar de ronda después de 1.5s
       const timeout = setTimeout(() => nextRound(), 1500);
       return () => clearTimeout(timeout);
-
     } else if (winner === 2) {
-      // si pierde, solo guardar score si es récord
-      if (score > (bestScore || 0)) {
-        submitScore(score).catch(console.error);
-      }
+      if (score > (bestScore || 0)) submitScore(score).catch(console.error);
     }
   }, [winner]);
+
+  if (!gameStarted) {
+    return (
+      <main className="p-6 text-slate-100 min-h-screen flex flex-col items-center justify-center bg-[linear-gradient(180deg,#071123_0%,#071726_100%)]">
+        <h1 className="text-4xl font-bold mb-4">Conecta 4 vs CPU 🤖</h1>
+        <p className="text-slate-400 mb-6 text-center max-w-md">
+          Selecciona la dificultad y compite contra la CPU. Cada victoria suma puntos y aumenta tu récord.
+        </p>
+        <button
+          onClick={() => setGameStarted(true)}
+          className="py-3 px-6 rounded-xl bg-gradient-to-r from-[#5b34ff] to-[#ff3fb6] text-white font-semibold hover:scale-105 transition"
+        >
+          Empezar Juego
+        </button>
+      </main>
+    );
+  }
 
   return (
     <main className="p-6 text-slate-100 min-h-screen bg-[linear-gradient(180deg,#071123_0%,#071726_100%)]">
@@ -194,6 +198,7 @@ export default function Connect4() {
                 setPlayer(1);
                 setRound(1);
                 setScore(0);
+                setGameStarted(false);
               }}
               className="px-3 py-1 bg-[#0ea5e9] rounded text-black text-sm"
             >
@@ -215,11 +220,7 @@ export default function Connect4() {
             {grid.flat().map((cell, i) => {
               const c = i % COLS;
               const color =
-                cell === 1
-                  ? "#ffcc00"
-                  : cell === 2
-                  ? "#60a5fa"
-                  : "#0b1220";
+                cell === 1 ? "#ffcc00" : cell === 2 ? "#60a5fa" : "#0b1220";
               return (
                 <div
                   key={i}

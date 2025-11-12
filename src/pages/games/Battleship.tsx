@@ -1,5 +1,5 @@
-import React, { useMemo, useState, useCallback, useEffect } from "react";
-import GameInstructions from '../../components/GameInstructions'
+import React, { useState, useCallback, useEffect, useMemo } from "react";
+import GameInstructions from '../../components/GameInstructions';
 import { EndGameButton } from '../../components/EndGameButton';
 import { useGameScore } from '../../hooks/useGameScore';
 
@@ -39,18 +39,48 @@ function placeShips(size: number, ships: number[]) {
 }
 
 export default function BattleshipRounds() {
+  const [board, setBoard] = useState<Cell[][] | null>(null);
   const [round, setRound] = useState(1);
   const [score, setScore] = useState(0);
   const [shots, setShots] = useState(0);
   const [hits, setHits] = useState(0);
-  const [board, setBoard] = useState<Cell[][]>(() => placeShips(SIZE, SHIPS));
+  const [gameStarted, setGameStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
 
   const { submitScore } = useGameScore('battleship');
 
+  const startGame = () => {
+    setBoard(placeShips(SIZE, SHIPS));
+    setRound(1);
+    setScore(0);
+    setShots(0);
+    setHits(0);
+    setGameOver(false);
+    setGameStarted(true);
+  };
+
+  const restart = useCallback(() => startGame(), []);
+
+  const shoot = useCallback(
+    (r: number, c: number) => {
+      if (!board || gameOver) return;
+      setBoard(prev => {
+        if (!prev) return prev;
+        const copy = prev.map(row => row.map(cell => ({ ...cell })));
+        if (copy[r][c].hit) return prev;
+        copy[r][c].hit = true;
+        if (copy[r][c].ship !== null) setHits(h => h + 1);
+        setShots(s => s + 1);
+        return copy;
+      });
+    },
+    [board, gameOver]
+  );
+
   const sunk = useMemo(() => {
+    if (!board) return 0;
     const shipsAlive = new Map<number, boolean>();
-    for (let r = 0; r < SIZE; r++) {
+    for (let r = 0; r < SIZE; r++)
       for (let c = 0; c < SIZE; c++) {
         const s = board[r][c].ship;
         if (s !== null) {
@@ -58,7 +88,6 @@ export default function BattleshipRounds() {
           if (!board[r][c].hit) shipsAlive.set(s, true);
         }
       }
-    }
     let sunkCount = 0;
     for (const hasUnhit of shipsAlive.values()) if (!hasUnhit) sunkCount++;
     return sunkCount;
@@ -68,62 +97,50 @@ export default function BattleshipRounds() {
   const allSunk = sunk === totalShips;
   const accuracy = shots > 0 ? ((hits / shots) * 100).toFixed(1) : "0.0";
 
-  const shoot = useCallback(
-    (r: number, c: number) => {
-      if (gameOver || allSunk) return;
-      setBoard((prev) => {
-        const copy = prev.map((row) => row.map((cell) => ({ ...cell })));
-        if (copy[r][c].hit) return prev;
-        copy[r][c].hit = true;
-        if (copy[r][c].ship !== null) setHits((h) => h + 1);
-        setShots((s) => s + 1);
-        return copy;
-      });
-    },
-    [gameOver, allSunk]
-  );
-
-  // ⏩ Pasar de ronda al ganar
-  React.useEffect(() => {
+  // Avanzar de ronda si gana
+  useEffect(() => {
     if (allSunk && !gameOver) {
       const timeout = setTimeout(() => {
-        setScore((s) => s + 500); // puntos por ronda
-        setRound((r) => r + 1);
+        setScore(s => s + 500);
+        setRound(r => r + 1);
         setShots(0);
         setHits(0);
         setBoard(placeShips(SIZE, SHIPS));
-      }, 1200);
+      }, 1000);
       return () => clearTimeout(timeout);
     }
   }, [allSunk, gameOver]);
 
-  // 💥 Perder si se acaban los tiros
-  React.useEffect(() => {
-    if (shots >= MAX_SHOTS_PER_ROUND && !allSunk) {
-      setGameOver(true);
-    }
+  // Perder si se acaban los tiros
+  useEffect(() => {
+    if (shots >= MAX_SHOTS_PER_ROUND && !allSunk) setGameOver(true);
   }, [shots, allSunk]);
 
-  const restart = useCallback(() => {
-    setBoard(placeShips(SIZE, SHIPS));
-    setShots(0);
-    setHits(0);
-    setScore(0);
-    setRound(1);
-    setGameOver(false);
-  }, []);
-
-  // Enviar puntuación al servidor cuando se acaba el juego
   useEffect(() => {
-    if (gameOver) {
-      // fire-and-forget, evitar errores no manejados
-      submitScore(score).catch(() => {});
-    }
+    if (gameOver) submitScore(score).catch(() => {});
   }, [gameOver, score, submitScore]);
 
+  // ---------- UI ----------
+
+  if (!gameStarted) {
+    return (
+      <main className="p-6 text-slate-100 min-h-screen flex flex-col items-center justify-center bg-[linear-gradient(180deg,#071123_0%,#071726_100%)]">
+        <h1 className="text-4xl font-bold mb-4">⚓ Battleship</h1>
+        <p className="text-slate-400 mb-6">Destruye todos los barcos por ronda y gana puntos.</p>
+        <button
+          onClick={startGame}
+          className="py-3 px-6 rounded-xl bg-linear-to-r from-[#5b34ff] to-[#ff3fb6] text-white font-semibold"
+        >
+          Empezar juego
+        </button>
+      </main>
+    );
+  }
+
   return (
-    <main className="p-6 text-slate-100 min-h-screen bg-slate-900 flex flex-col items-center justify-center">
+    <main className="p-6 text-slate-100 min-h-screen bg-[linear-gradient(180deg,#071123_0%,#071726_100%)] flex flex-col items-center justify-center">
       <div className="max-w-3xl mx-auto text-center">
+        {/* Header uniforme */}
         <header className="flex flex-col md:flex-row items-center justify-between mb-6 gap-3">
           <div>
             <h1 className="text-3xl font-bold text-[#0ea5e9]">Battleship ⚓</h1>
@@ -137,47 +154,35 @@ export default function BattleshipRounds() {
             <EndGameButton />
             <button
               onClick={restart}
-              className="px-3 py-1 bg-[#0ea5e9] hover:bg-[#0284c7] transition rounded text-black font-semibold"
+              className="px-3 py-1 bg-linear-to-r from-[#5b34ff] to-[#ff3fb6] text-white font-semibold rounded-xl"
             >
               Reiniciar
             </button>
           </div>
-  </header>
+        </header>
 
-  <GameInstructions />
+        <GameInstructions />
 
-  <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-5 inline-block shadow-lg">
+        {/* Tablero */}
+        <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-5 inline-block shadow-lg">
           <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: `repeat(${SIZE}, 38px)`,
-              gap: 6,
-            }}
+            style={{ display: "grid", gridTemplateColumns: `repeat(${SIZE}, 38px)`, gap: 6 }}
           >
-            {board.flat().map((cell, i) => {
-              const r = Math.floor(i / SIZE),
-                c = i % SIZE;
+            {board!.flat().map((cell, i) => {
+              const r = Math.floor(i / SIZE);
+              const c = i % SIZE;
               const show = cell.hit;
               const isShip = cell.ship !== null;
               const cellColor = show
-                ? isShip
-                  ? "#ef4444" // hit
-                  : "#1f2937" // miss
+                ? isShip ? "#ef4444" : "#1f2937"
                 : "#0b1220";
               const emoji = show ? (isShip ? "💥" : "💦") : "";
-
               return (
                 <button
                   key={i}
                   onClick={() => shoot(r, c)}
                   disabled={gameOver || allSunk}
-                  style={{
-                    width: 38,
-                    height: 38,
-                    background: cellColor,
-                    borderRadius: 6,
-                    transition: "background 0.2s",
-                  }}
+                  style={{ width: 38, height: 38, background: cellColor, borderRadius: 6, transition: "background 0.2s" }}
                   className="flex items-center justify-center font-bold text-white hover:brightness-125"
                 >
                   {emoji}
@@ -187,12 +192,7 @@ export default function BattleshipRounds() {
           </div>
 
           <div className="mt-4 text-white">
-            <div>
-              Barcos hundidos:{" "}
-              <span className="font-semibold text-[#0ea5e9]">
-                {sunk}/{totalShips}
-              </span>
-            </div>
+            <div>Barcos hundidos: <span className="font-semibold text-[#0ea5e9]">{sunk}/{totalShips}</span></div>
             {allSunk && (
               <div className="mt-3 text-green-400 font-bold text-lg animate-pulse">
                 ¡Ronda completada! 🚀 +500 puntos
@@ -204,7 +204,7 @@ export default function BattleshipRounds() {
                 <br />
                 <button
                   onClick={restart}
-                  className="mt-3 px-4 py-1 bg-blue-500 hover:bg-blue-600 transition rounded text-white text-sm"
+                  className="mt-3 px-4 py-2 bg-linear-to-r from-[#5b34ff] to-[#ff3fb6] text-white font-semibold rounded-xl"
                 >
                   Reiniciar
                 </button>
