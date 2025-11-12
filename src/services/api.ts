@@ -177,7 +177,7 @@ export const api = {
       try {
         const error = JSON.parse(errorText);
         throw new Error(error.message || 'Error guardando puntuación');
-      } catch (e) {
+      } catch {
         throw new Error('Error guardando puntuación');
       }
     }
@@ -189,12 +189,40 @@ export const api = {
     const response = await fetch(`${API_URL}/leaderboard/${gameName}/top?limit=${limit}`, {
       headers: getAuthHeaders(),
     });
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || 'Error obteniendo leaderboard');
     }
-    
+
+    const data = await response.json();
+    // Backend returns { game, top } — normalize to return the array of entries
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.top)) return data.top;
+  return [] as unknown[];
+  },
+
+  // Get scores for the authenticated user
+  getMyScores: async () => {
+    const response = await fetch(`${API_URL}/leaderboard/me`, {
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Error obteniendo mis scores');
+    }
+
+    return response.json();
+  },
+
+  // Get scores for a given user id (public)
+  getUserScores: async (userId: string) => {
+    const response = await fetch(`${API_URL}/leaderboard/user/${userId}`);
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Error obteniendo scores del usuario');
+    }
     return response.json();
   },
 };

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { auth } from '../utils/auth';
+import { api } from '../services/api';
 import GameCarousel from '../components/GameCarousel';
 import PaymentModal from '../components/PaymentModal';
 
@@ -34,6 +35,29 @@ export default function Dashboard() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const isPremiumUser = auth.getUser()?.hasPaid || false;
 
+  // Generar scores de prueba para varios juegos (usar para testing)
+  const generateTestScores = async () => {
+    const games = [
+      'memorama', 'blackjack', 'flappy', '2048', 'tetris', 'pacman', 'ahorcado',
+      'minesweeper', 'snake', 'battleship', 'connect4', 'sudoku', 'showdown', 'simondice', 'clicker'
+    ];
+
+    const tasks = games.map((g) => {
+      const randomScore = Math.floor(Math.random() * 5000) + 10;
+      return api.postGameScore(g, randomScore).then(
+        (res) => ({ game: g, ok: true, res }),
+        (err) => ({ game: g, ok: false, err: String(err) })
+      );
+    });
+
+  const results: Array<{game:string; ok:boolean; res?: unknown; err?: string}> = await Promise.all(tasks);
+  const succeeded = results.filter((r) => r.ok).length;
+    const failed = results.length - succeeded;
+    // Mostrar resumen rápido
+    alert(`Scores generados: ${succeeded} exitosos, ${failed} fallidos (revisa la consola para detalles)`);
+    console.log('Resultados generación scores de prueba:', results);
+  };
+
   const handlePremiumClick = () => {
     if (!isPremiumUser) {
       setShowPaymentModal(true);
@@ -51,6 +75,14 @@ export default function Dashboard() {
         <header className="mb-6">
           <h1 className="text-3xl font-semibold mb-1">Biblioteca de Juegos</h1>
           <p className="text-slate-400">Selecciona tu juego favorito y comienza a jugar</p>
+          <div className="mt-3">
+            <button
+              onClick={generateTestScores}
+              className="px-3 py-1 bg-green-500 hover:bg-green-400 rounded text-black text-sm font-semibold"
+            >
+              Generar scores de prueba
+            </button>
+          </div>
         </header>
 
         <GameCarousel
