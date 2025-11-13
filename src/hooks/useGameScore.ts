@@ -20,6 +20,13 @@ export const useGameScore = (gameName: string) => {
       const result = await api.postGameScore(gameName, Math.floor(score));
       setLastScore(score);
       setBestScore(result.best);
+      // Notify other components (e.g. carousel) that this user's score updated
+      try {
+        const evt = new CustomEvent('score:updated', { detail: { name: gameName, score: result.best } });
+        window.dispatchEvent(evt);
+      } catch {
+        // ignore if CustomEvent not supported in environment
+      }
       return result;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar la puntuación');
