@@ -20,6 +20,9 @@ export const auth = {
     // User data management
     setUser: (user: UserData) => {
         localStorage.setItem('user', JSON.stringify(user));
+        try {
+            window.dispatchEvent(new CustomEvent('auth:changed', { detail: user }));
+        } catch {}
     },
     getUser: (): UserData | null => {
         const user = localStorage.getItem('user');
@@ -27,6 +30,9 @@ export const auth = {
     },
     removeUser: () => {
         localStorage.removeItem('user');
+        try {
+            window.dispatchEvent(new CustomEvent('auth:changed', { detail: null }));
+        } catch {}
     },
 
     // Combined login data setter
@@ -39,6 +45,9 @@ export const auth = {
     logout: () => {
         auth.removeToken();
         auth.removeUser();
+        try {
+            window.dispatchEvent(new CustomEvent('auth:changed', { detail: null }));
+        } catch {}
     },
 
     // Check if user is logged in

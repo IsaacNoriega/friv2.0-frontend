@@ -24,8 +24,18 @@ export default function Profile() {
     setFormData(prev => ({
       ...prev,
       username: userData.username,
-      email: userData.email
+      email: userData.email,
+      hasPaid: !!userData.hasPaid
     }));
+    // listen to auth changes to reflect hasPaid updates instantly
+    const handler = () => {
+      // read authoritative user object from auth util
+      const latest = auth.getUser();
+      if (!latest) return;
+      setFormData(prev => ({ ...prev, hasPaid: !!latest.hasPaid, username: latest.username ?? prev.username, email: latest.email ?? prev.email }));
+    };
+    window.addEventListener('auth:changed', handler as EventListener);
+    return () => window.removeEventListener('auth:changed', handler as EventListener);
   }, [navigate]);
 
   async function submit(e: React.FormEvent){
@@ -70,7 +80,7 @@ export default function Profile() {
               <div className="flex justify-between mb-2"><span>Victorias:</span><span className="font-semibold">189</span></div>
             </div>
 
-            <button className="mt-4 w-full py-2 rounded-md bg-gradient-to-r from-[#5b34ff] to-[#ff3fb6] text-white font-semibold">Cambiar Avatar</button>
+            <button className="mt-4 w-full py-2 rounded-md bg-linear-to-r from-[#5b34ff] to-[#ff3fb6] text-white font-semibold">Cambiar Avatar</button>
           </div>
         </aside>
 
@@ -120,7 +130,7 @@ export default function Profile() {
             <div className="flex justify-end">
                           <button 
               type="submit" 
-              className="w-full py-3 rounded-md bg-gradient-to-r from-[#5b34ff] to-[#ff3fb6] text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 rounded-md bg-linear-to-r from-[#5b34ff] to-[#ff3fb6] text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={loading}
             >
               {loading ? 'Guardando...' : 'Guardar Cambios'}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { auth } from '../utils/auth';
 import { api } from '../services/api';
 import GameCarousel from '../components/GameCarousel';
@@ -29,7 +29,17 @@ const freeGames = [
 
 export default function Dashboard() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const isPremiumUser = auth.getUser()?.hasPaid || false;
+  const [isPremiumUser, setIsPremiumUser] = useState<boolean>(!!auth.getUser()?.hasPaid);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const ce = e as CustomEvent<Record<string, unknown> | null>;
+      const updated = ce.detail as ({ hasPaid?: boolean } | null);
+      setIsPremiumUser(!!(updated?.hasPaid || auth.getUser()?.hasPaid));
+    };
+    window.addEventListener('auth:changed', handler as EventListener);
+    return () => window.removeEventListener('auth:changed', handler as EventListener);
+  }, []);
 
   // Generar scores de prueba para varios juegos (usar para testing)
   const generateTestScores = async () => {
@@ -61,8 +71,9 @@ export default function Dashboard() {
   };
 
   const handlePaymentSuccess = () => {
-    // El usuario ya estará actualizado por el PaymentModal
-    window.location.reload(); // Recargar para mostrar juegos premium
+    // El usuario ya estará actualizado por el PaymentModal via auth.setUser
+    setShowPaymentModal(false);
+    setIsPremiumUser(!!auth.getUser()?.hasPaid);
   };
 
   return (

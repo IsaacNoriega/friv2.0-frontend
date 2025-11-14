@@ -1,5 +1,6 @@
 import { auth } from "../utils/auth";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from 'react';
 
 type View = "login" | "register" | "dashboard" | "ranking" | "score" | "profile" | "guest";
 
@@ -44,6 +45,16 @@ function IconUser(){
 
 export default function Sidebar({ current, onNavigate }: { current: View; onNavigate: (v: View) => void; }) {
   const navigate = useNavigate();
+  const [user, setUser] = useState(auth.getUser());
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const ce = e as CustomEvent<any>;
+      setUser(ce.detail || null);
+    };
+    window.addEventListener('auth:changed', handler as EventListener);
+    return () => window.removeEventListener('auth:changed', handler as EventListener);
+  }, []);
 
   const handleLogout = () => {
     auth.logout();
@@ -59,11 +70,11 @@ export default function Sidebar({ current, onNavigate }: { current: View; onNavi
 
   <div className="bg-[rgba(255,255,255,0.02)] p-4 rounded-xl mb-6 flex items-center gap-4 border border-sky-600/30 shadow-sm">
         <div className="w-14 h-14 rounded-lg bg-linear-to-br from-[#8c5bff] to-[#6aa6ff] flex items-center justify-center font-bold text-white text-lg ring-2 ring-sky-500/20">
-          {auth.getUser()?.username.slice(0, 2).toUpperCase() || 'IN'}
+          {user?.username?.slice(0, 2).toUpperCase() || 'IN'}
         </div>
         <div>
-          <div className="font-semibold text-white">{auth.getUser()?.username || 'Invitado'}</div>
-          <div className="text-slate-400 text-xs">{auth.getUser()?.hasPaid ? 'Usuario Premium' : 'Modo Gratuito'}</div>
+          <div className="font-semibold text-white">{user?.username || 'Invitado'}</div>
+          <div className="text-slate-400 text-xs">{user?.hasPaid ? 'Usuario Premium' : 'Modo Gratuito'}</div>
         </div>
       </div>
 

@@ -182,7 +182,7 @@ export default function GameCarousel({ title, games, isPremium, onPremiumClick }
         style={{ scrollBehavior: 'smooth' }}
       >
         {games.map((g) => (
-          <article key={g.title} className="relative bg-[#0f2430] rounded-xl shadow-xl overflow-hidden border border-slate-800 transform transition-all duration-200 hover:scale-105 snap-start"
+          <article key={g.title} className="relative bg-[#0f2430] rounded-xl overflow-hidden transform transition-all duration-150 snap-start border-2 border-slate-800 hover:border-sky-500/60 hover:shadow-lg"
             style={{ minWidth: 'min(33.333%, 320px)' }}>
             <div 
               style={{background: `linear-gradient(90deg, ${g.colorFrom}, ${g.colorTo})`}} 
