@@ -71,16 +71,34 @@ export default function Profile() {
             </div>
             <div className="text-center">
               <div className="text-xl font-semibold">{formData.username}</div>
-              <div className="text-amber-300 text-sm">{formData.hasPaid ? 'Usuario Premium' : 'Modo Gratuito'}</div>
+              {formData.hasPaid && <div className="text-amber-300 text-sm">Usuario Premium</div>}
             </div>
 
-            <div className="w-full border-t border-slate-800 pt-4 text-sm text-slate-300">
-              <div className="flex justify-between mb-2"><span>Nivel:</span><span className="font-semibold">42</span></div>
-              <div className="flex justify-between mb-2"><span>Ranking:</span><span className="font-semibold">#247</span></div>
-              <div className="flex justify-between mb-2"><span>Victorias:</span><span className="font-semibold">189</span></div>
-            </div>
+            {formData.hasPaid && (
+              <div className="w-full border-t border-slate-800 pt-4 text-sm text-slate-300">
+                <div className="flex justify-between mb-2"><span>Estado:</span><span className="font-semibold">Premium</span></div>
+              </div>
+            )}
 
-            <button className="mt-4 w-full py-2 rounded-md bg-linear-to-r from-[#5b34ff] to-[#ff3fb6] text-white font-semibold">Cambiar Avatar</button>
+            <div className="w-full flex flex-col gap-2 mt-4">
+              <button className="w-full py-2 rounded-md bg-linear-to-r from-[#5b34ff] to-[#ff3fb6] text-white font-semibold">Cambiar Avatar</button>
+              <button onClick={async () => {
+                const ok = window.confirm('¿Estás seguro que quieres eliminar tu cuenta? Esta acción no se puede deshacer.');
+                if (!ok) return;
+                setLoading(true);
+                try {
+                  const user = auth.getUser();
+                  if (!user?.id) throw new Error('Usuario no encontrado');
+                  await api.deleteUser(user.id);
+                  auth.logout();
+                  navigate('/register');
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : 'Error eliminando la cuenta');
+                } finally {
+                  setLoading(false);
+                }
+              }} className="w-full py-2 rounded-md bg-red-600 text-white font-semibold hover:bg-red-700">Eliminar Cuenta</button>
+            </div>
           </div>
         </aside>
 

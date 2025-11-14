@@ -74,7 +74,7 @@ export default function Sidebar({ current, onNavigate }: { current: View; onNavi
         </div>
         <div>
           <div className="font-semibold text-white">{user?.username || 'Invitado'}</div>
-          <div className="text-slate-400 text-xs">{user?.hasPaid ? 'Usuario Premium' : 'Modo Gratuito'}</div>
+          {user?.hasPaid && <div className="text-amber-300 text-xs">Usuario Premium</div>}
         </div>
       </div>
 
