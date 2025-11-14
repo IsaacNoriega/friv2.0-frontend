@@ -124,7 +124,14 @@ export default function Clicker() {
           </div>
         </header>
 
-        <GameInstructions />
+        <GameInstructions 
+          title="Cómo Jugar Clicker"
+          description="Haz clic en el botón lo más rápido que puedas para acumular puntos. Cada clic suma puntos a tu contador. ¡Intenta alcanzar la puntuación más alta en el menor tiempo posible!"
+          controls={[
+            { key: 'Clic', action: 'Ganar 1 punto' }
+          ]}
+          note="La velocidad y la resistencia son clave. ¿Cuántos clics puedes hacer en un minuto?"
+        />
 
         <div className="grid md:grid-cols-2 gap-6">
           {/* Panel de juego */}

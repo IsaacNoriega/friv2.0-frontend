@@ -198,7 +198,15 @@ export default function Flappy() {
           </div>
   </header>
 
-  <GameInstructions />
+  <GameInstructions 
+          title="Cómo Jugar Flappy Bird"
+          description="Haz clic o presiona Espacio para que el pájaro aletee y suba. Pasa entre los tubos sin chocar. Cada tubo superado suma 1 punto. ¡La gravedad te empuja hacia abajo constantemente!"
+          controls={[
+            { key: 'Espacio', action: 'Aletear / Saltar' },
+            { key: 'Clic', action: 'Aletear / Saltar' }
+          ]}
+          note="El tiempo de reacción es clave. Mantén un ritmo constante de clics para volar suavemente."
+        />
 
   <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4 relative">
           <div style={{ width: "100%", maxWidth: 480, position: "relative" }}>

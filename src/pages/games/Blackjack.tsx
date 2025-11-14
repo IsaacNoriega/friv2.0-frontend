@@ -112,7 +112,15 @@ export default function Blackjack() {
           </div>
         </header>
 
-        <GameInstructions />
+        <GameInstructions 
+          title="Cómo Jugar Blackjack"
+          description="Intenta llegar a 21 puntos sin pasarte. Las cartas numéricas valen su número, las figuras valen 10, y el As puede valer 1 u 11. Puedes pedir más cartas (Hit) o plantarte (Stand). Ganas si tu puntuación es mayor que la del dealer sin pasarte de 21."
+          controls={[
+            { key: 'Hit', action: 'Pedir otra carta' },
+            { key: 'Stand', action: 'Plantarse' }
+          ]}
+          note="Si te pasas de 21, pierdes automáticamente. El dealer debe pedir carta hasta tener 17 o más."
+        />
 
         <section className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
           <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-6 shadow-lg">

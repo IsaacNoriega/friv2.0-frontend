@@ -343,7 +343,15 @@ export default function MinesweeperRondas() {
           </div>
         </header>
 
-        <GameInstructions />
+        <GameInstructions 
+          title="Cómo Jugar Buscaminas"
+          description="Descubre todas las casillas que no tienen minas. Los números indican cuántas minas hay en las casillas adyacentes. Usa esta información para deducir dónde están las minas y márcalas con banderas."
+          controls={[
+            { key: 'Clic Izq.', action: 'Revelar casilla' },
+            { key: 'Clic Der.', action: 'Marcar bandera' }
+          ]}
+          note="Si haces clic en una mina, pierdes. Usa la lógica para resolver el tablero sin riesgos."
+        />
 
         <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-6 overflow-auto">
           <div

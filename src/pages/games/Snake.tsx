@@ -107,9 +107,17 @@ export default function Snake(){
           </div>
   </header>
 
-  <GameInstructions />
-
-  <section className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4">
+        <GameInstructions 
+          title="Cómo Jugar Snake"
+          description="Controla la serpiente para comer la comida roja. Cada vez que comes, la serpiente crece y ganas puntos. ¡Evita chocar con las paredes o con tu propio cuerpo!"
+          controls={[
+            { key: '←', action: 'Girar izquierda' },
+            { key: '→', action: 'Girar derecha' },
+            { key: '↑', action: 'Girar arriba' },
+            { key: '↓', action: 'Girar abajo' }
+          ]}
+          note="La serpiente se mueve constantemente. Planea tu ruta con anticipación para no quedar atrapado."
+        />  <section className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4">
           <div style={{ gridTemplateColumns: `repeat(${COLS}, 1fr)` }} className="grid gap-0 w-full border border-slate-800 bg-[#071826]">
             {Array.from({ length: ROWS }).map((_, r) => (
               Array.from({ length: COLS }).map((__, c) => {

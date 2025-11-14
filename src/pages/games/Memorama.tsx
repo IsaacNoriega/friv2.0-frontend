@@ -175,7 +175,14 @@ export default function MemoramaPorRondas() {
           </div>
   </header>
 
-  <GameInstructions />
+  <GameInstructions 
+          title="Cómo Jugar Memorama"
+          description="Encuentra todos los pares de cartas iguales. Haz clic en dos cartas para voltearlas. Si coinciden, permanecen descubiertas. Si no, se voltean de nuevo. ¡Memoriza las posiciones para ganar más rápido!"
+          controls={[
+            { key: 'Clic', action: 'Voltear carta' }
+          ]}
+          note="Intenta completar el juego en el menor número de movimientos posible."
+        />
 
   <section className="bg-[#0e1b26] rounded-xl border border-slate-800 p-6">
           <div className="grid gap-4" style={cols as React.CSSProperties}>

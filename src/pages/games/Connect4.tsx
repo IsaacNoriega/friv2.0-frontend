@@ -207,7 +207,14 @@ export default function Connect4() {
           </div>
         </header>
 
-        <GameInstructions />
+        <GameInstructions 
+          title="Cómo Jugar Conecta 4"
+          description="Conecta 4 fichas de tu color en línea (horizontal, vertical o diagonal) antes que tu oponente. Las fichas caen por gravedad hasta la posición más baja disponible en cada columna. ¡Piensa estratégicamente para bloquear a tu rival!"
+          controls={[
+            { key: 'Clic', action: 'Soltar ficha en columna' }
+          ]}
+          note="Controla el centro del tablero para tener más opciones de conexión. Siempre busca crear amenazas dobles."
+        />
 
         <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4 inline-block">
           <div

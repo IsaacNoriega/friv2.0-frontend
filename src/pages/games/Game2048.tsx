@@ -237,7 +237,17 @@ export default function Game2048() {
           </div>
   </header>
 
-  <GameInstructions />
+  <GameInstructions 
+          title="Cómo Jugar 2048"
+          description="Desliza las fichas en cualquier dirección. Cuando dos fichas con el mismo número se tocan, se fusionan en una sola sumando sus valores. ¡El objetivo es crear una ficha con el número 2048!"
+          controls={[
+            { key: '←', action: 'Mover izquierda' },
+            { key: '→', action: 'Mover derecha' },
+            { key: '↑', action: 'Mover arriba' },
+            { key: '↓', action: 'Mover abajo' }
+          ]}
+          note="Cada movimiento genera una nueva ficha (2 o 4). El juego termina cuando no quedan movimientos posibles."
+        />
 
   <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4 shadow-lg">
           <div

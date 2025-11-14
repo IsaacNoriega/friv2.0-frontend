@@ -262,9 +262,17 @@ export default function Tetris() {
           </div>
   </header>
 
-  <GameInstructions />
-
-  <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4 overflow-auto">
+        <GameInstructions 
+          title="Cómo Jugar Tetris"
+          description="Coloca las piezas que caen para formar líneas horizontales completas. Cuando completas una línea, desaparece y ganas puntos. El juego termina si las piezas llegan hasta arriba."
+          controls={[
+            { key: '←', action: 'Mover izquierda' },
+            { key: '→', action: 'Mover derecha' },
+            { key: '↓', action: 'Caída rápida' },
+            { key: '↑ / Z', action: 'Rotar pieza' }
+          ]}
+          note="Completa múltiples líneas a la vez para obtener más puntos. ¡Evita dejar huecos!"
+        />  <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4 overflow-auto">
           <div style={{ width: COLS * 24, background: "#071123", padding: 6 }}>
             <div
               style={{

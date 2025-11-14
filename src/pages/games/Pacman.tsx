@@ -205,7 +205,17 @@ export default function Pacman() {
           </div>
         </header>
 
-        <GameInstructions />
+        <GameInstructions 
+          title="Cómo Jugar Pacman"
+          description="Come todos los puntos del laberinto mientras evitas a los fantasmas. Cuando comes una píldora grande (power pellet), los fantasmas se vuelven azules y puedes comértelos por puntos extra. ¡Limpia todo el laberinto para ganar!"
+          controls={[
+            { key: '←', action: 'Mover izquierda' },
+            { key: '→', action: 'Mover derecha' },
+            { key: '↑', action: 'Mover arriba' },
+            { key: '↓', action: 'Mover abajo' }
+          ]}
+          note="Los fantasmas tienen diferentes patrones de movimiento. Observa sus comportamientos para evitarlos."
+        />
 
         {!started ? (
           <div className="text-center mt-16">

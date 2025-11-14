@@ -107,7 +107,14 @@ export default function SimonDice() {
           <EndGameButton />
         </div>
 
-        <GameInstructions />
+        <GameInstructions 
+          title="Cómo Jugar Simón Dice"
+          description="Memoriza y repite la secuencia de colores que se iluminan. Cada ronda añade un nuevo color a la secuencia. Haz clic en los colores en el orden correcto. ¡Concéntrate y llega lo más lejos posible!"
+          controls={[
+            { key: 'Clic', action: 'Seleccionar color' }
+          ]}
+          note="Toma tu tiempo para memorizar. No hay límite de tiempo para repetir la secuencia."
+        />
 
         <p className="mb-2">Nivel: {level}</p>
         <p className="mb-2">Puntaje: {score}</p>

@@ -193,7 +193,15 @@ export default function Sudoku() {
           <EndGameButton />
         </div>
 
-        <GameInstructions />
+        <GameInstructions 
+          title="Cómo Jugar Sudoku"
+          description="Completa la cuadrícula 9x9 con números del 1 al 9. Cada fila, columna y caja 3x3 debe contener todos los números del 1 al 9 sin repetir. Usa la lógica y eliminación para resolver el puzzle."
+          controls={[
+            { key: 'Clic', action: 'Seleccionar casilla' },
+            { key: '1-9', action: 'Ingresar número' }
+          ]}
+          note="Empieza por las filas, columnas o cajas con más números dados. Busca los números que solo pueden ir en una posición."
+        />
 
         <div className="flex justify-center gap-6 mb-4">
           <p className="text-xl">Ronda: <b>{level}</b></p>

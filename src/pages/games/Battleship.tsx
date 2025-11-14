@@ -161,7 +161,14 @@ export default function BattleshipRounds() {
           </div>
         </header>
 
-        <GameInstructions />
+        <GameInstructions 
+          title="Cómo Jugar Battleship"
+          description="Coloca tus barcos en el tablero y ataca las coordenadas del oponente para hundir su flota. Cuando aciertes, verás 'HIT'. Cuando falles, verás 'MISS'. El primero en hundir todos los barcos del rival gana."
+          controls={[
+            { key: 'Clic', action: 'Colocar barco / Atacar' }
+          ]}
+          note="Usa un patrón de búsqueda sistemático. Cuando aciertes, ataca las casillas adyacentes para hundir el barco completo."
+        />
 
         {/* Tablero */}
         <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-5 inline-block shadow-lg">

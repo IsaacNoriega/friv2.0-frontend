@@ -132,7 +132,14 @@ export default function AhorcadoArcade() {
           </div>
         </header>
 
-        <GameInstructions />
+        <GameInstructions 
+          title="Cómo Jugar Ahorcado"
+          description="Adivina la palabra oculta letra por letra. Cada letra incorrecta dibuja una parte del ahorcado. Tienes 6 intentos antes de perder. Usa tu vocabulario y lógica para descubrir la palabra completa."
+          controls={[
+            { key: 'Clic', action: 'Seleccionar letra' }
+          ]}
+          note="Las vocales suelen ser una buena estrategia inicial. Presta atención a los patrones de letras."
+        />
 
         {/* Contenedor principal */}
         <div className="bg-[#0e1b26] rounded-xl border border-slate-700 p-6 shadow-xl text-center">
