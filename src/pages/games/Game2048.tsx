@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { motion, AnimatePresence } from 'framer-motion';
 import GameInstructions from '../../components/GameInstructions';
 import { EndGameButton } from '../../components/EndGameButton';
 import { useGameScore } from '../../hooks/useGameScore';
@@ -77,9 +78,15 @@ export default function Game2048() {
   );
   const [over, setOver] = useState(false);
   const { submitScore } = useGameScore('2048');
+  const [lastMoveDir, setLastMoveDir] = useState<string | null>(null);
+  const [renderVersion, setRenderVersion] = useState(0);
+  const [mergedIndices, setMergedIndices] = useState<Set<number>>(new Set());
+  const [isMoving, setIsMoving] = useState(false);
 
   const handleMove = useCallback(
     (key: string) => {
+      if (isMoving) return; // Prevent spam by blocking during animation
+      
       let g = grid.map((r) => r.slice());
       let result: { grid: Tile[][]; moved: boolean; scoreGain?: number };
 
@@ -99,8 +106,28 @@ export default function Game2048() {
       } else return;
 
       if (result.moved) {
+        setIsMoving(true);
         const withSpawn = spawnTile(result.grid);
+        
+        // Track merged tiles indices for animation highlighting
+        const newMerged = new Set<number>();
+        result.grid.flat().forEach((v, idx) => {
+          const oldV = grid.flat()[idx];
+          if (v && oldV && v > oldV && v !== 2) {
+            newMerged.add(idx);
+          }
+        });
+        
+        // record move direction to drive entrance/exit animations
+        setLastMoveDir(key);
+        setRenderVersion(v => v + 1);
+        setMergedIndices(newMerged);
+        setTimeout(() => setMergedIndices(new Set()), 450);
         setGrid(withSpawn);
+        
+        // Release cooldown after animation completes
+        setTimeout(() => setIsMoving(false), 250);
+        
         const gain = result.scoreGain ?? 0;
         setScore((s) => {
           const newScore = s + gain;
@@ -116,7 +143,7 @@ export default function Game2048() {
         });
       }
     },
-    [grid, best, submitScore]
+    [grid, best, submitScore, isMoving]
   );
 
   useEffect(() => {
@@ -214,24 +241,54 @@ export default function Game2048() {
 
   <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4 shadow-lg">
           <div
-            className="grid gap-2 transition-all duration-200"
+            className="grid gap-2"
             style={{ gridTemplateColumns: `repeat(${SIZE}, 1fr)` }}
           >
-            {grid.flat().map((v, i) => (
-              <div
-                key={i}
-                className={`flex items-center justify-center text-2xl font-bold rounded-md ${tileColor(
-                  v
-                )} border border-slate-800 transition-all duration-200 ease-out`}
-                style={{
-                  aspectRatio: "1 / 1",
-                  minHeight: 70,
-                  transform: v ? "scale(1)" : "scale(0.95)",
-                }}
-              >
-                {v ?? ""}
-              </div>
-            ))}
+            <AnimatePresence initial={false} mode="popLayout">
+              {grid.flat().map((v, i) => {
+                // compute entrance offset based on lastMoveDir
+                let enterX = 0;
+                let enterY = 0;
+                if (lastMoveDir === 'ArrowLeft') enterX = 24;
+                if (lastMoveDir === 'ArrowRight') enterX = -24;
+                if (lastMoveDir === 'ArrowUp') enterY = 24;
+                if (lastMoveDir === 'ArrowDown') enterY = -24;
+
+                const key = `tile-${renderVersion}-${i}-${v}`;
+                const isMerged = mergedIndices.has(i);
+
+                return (
+                  <motion.div
+                    layout
+                    key={key}
+                    initial={{ x: enterX, y: enterY, opacity: 0, scale: 0.88 }}
+                    animate={
+                      isMerged
+                        ? { x: 0, y: 0, opacity: 1, scale: [1, 1.08, 1] }
+                        : { x: 0, y: 0, opacity: 1, scale: 1 }
+                    }
+                    exit={{ opacity: 0, scale: 0.88 }}
+                    transition={{
+                      duration: isMerged ? 0.35 : 0.2,
+                      ease: [0.4, 0.0, 0.2, 1],
+                    }}
+                    className={`flex items-center justify-center text-2xl font-bold rounded-md ${tileColor(
+                      v
+                    )} ${
+                      isMerged
+                        ? "border-2 border-amber-400 shadow-lg shadow-amber-500/50"
+                        : "border border-slate-800"
+                    }`}
+                    style={{
+                      aspectRatio: "1 / 1",
+                      minHeight: 70,
+                    }}
+                  >
+                    {v ?? ""}
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
           {over && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 rounded-xl">
