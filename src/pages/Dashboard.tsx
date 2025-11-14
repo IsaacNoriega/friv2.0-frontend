@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { SparklesIcon, RocketLaunchIcon } from '@heroicons/react/24/solid';
 import { auth } from '../utils/auth';
 import { api } from '../services/api';
 import GameCarousel from '../components/GameCarousel';
@@ -77,32 +79,75 @@ export default function Dashboard() {
   };
 
   return (
-    <main className="flex-1 p-8 bg-[linear-gradient(180deg,#071123_0%,#071726_100%)] min-h-screen text-slate-100">
-      <div className="max-w-[1200px] mx-auto">
-        <header className="mb-6">
-          <h1 className="text-3xl font-semibold mb-1">Biblioteca de Juegos</h1>
-          <p className="text-slate-400">Selecciona tu juego favorito y comienza a jugar</p>
-          <div className="mt-3">
-            <button
-              onClick={generateTestScores}
-              className="px-3 py-1 bg-green-500 hover:bg-green-400 rounded text-black text-sm font-semibold"
-            >
-              Generar scores de prueba
-            </button>
+    <main className="flex-1 p-8 bg-linear-to-br from-[#050d1a] via-[#071123] to-[#0a1628] min-h-screen text-slate-100">
+      <div className="max-w-[1400px] mx-auto">
+        {/* Header with gradient and animation */}
+        <motion.header 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-10"
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <SparklesIcon className="w-10 h-10 text-amber-400" />
+            <h1 className="text-5xl font-black bg-linear-to-r from-sky-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              Biblioteca de Juegos
+            </h1>
           </div>
-        </header>
+          <p className="text-slate-400 text-lg ml-13">Selecciona tu juego favorito y comienza a competir</p>
+          
+          {/* User status badge */}
+          {isPremiumUser && (
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.3, type: 'spring' }}
+              className="mt-4 inline-flex items-center gap-2 bg-linear-to-r from-amber-500/20 to-amber-600/10 border border-amber-500/40 rounded-full px-4 py-2 backdrop-blur-sm"
+            >
+              <RocketLaunchIcon className="w-5 h-5 text-amber-400" />
+              <span className="text-amber-300 font-semibold">Acceso Premium Activo</span>
+            </motion.div>
+          )}
 
-        <GameCarousel
-          title="Juegos Gratuitos"
-          games={freeGames}
-        />
+          {/* Test scores button - hidden in production */}
+          {import.meta.env.DEV && (
+            <div className="mt-4">
+              <button
+                onClick={generateTestScores}
+                className="px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 rounded-lg text-emerald-300 text-sm font-semibold transition-all"
+              >
+                🧪 Generar scores de prueba
+              </button>
+            </div>
+          )}
+        </motion.header>
 
-        <GameCarousel
-          title="Juegos Premium"
-          games={premiumGames}
-          isPremium={!isPremiumUser}
-          onPremiumClick={handlePremiumClick}
-        />
+        {/* Free games section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mb-12"
+        >
+          <GameCarousel
+            title="Juegos Gratuitos"
+            games={freeGames}
+          />
+        </motion.div>
+
+        {/* Premium games section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <GameCarousel
+            title="Juegos Premium"
+            games={premiumGames}
+            isPremium={!isPremiumUser}
+            onPremiumClick={handlePremiumClick}
+          />
+        </motion.div>
       </div>
 
       <PaymentModal

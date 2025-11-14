@@ -1,47 +1,18 @@
 import { auth } from "../utils/auth";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { 
+  HomeIcon, 
+  TrophyIcon, 
+  ChartBarIcon, 
+  UserCircleIcon, 
+  ArrowRightOnRectangleIcon,
+  ShieldCheckIcon,
+  SparklesIcon
+} from '@heroicons/react/24/outline';
 
 type View = "login" | "register" | "dashboard" | "ranking" | "score" | "profile" | "guest";
-
-function IconGames(){
-  return (
-    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-      <path d="M6 12v-2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M10 12v.01" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M14 12v.01" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M18 12v-2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-      <rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" strokeWidth="1.2" />
-    </svg>
-  );
-}
-function IconTrophy(){
-  return (
-    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-      <path d="M8 3h8v4a3 3 0 01-3 3H11a3 3 0 01-3-3V3z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M3 8h18" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M10 21h4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  );
-}
-function IconChart(){
-  return (
-    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-      <path d="M3 3v18h18" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M7 13v5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M12 9v9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M17 5v13" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  );
-}
-function IconUser(){
-  return (
-    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-      <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="1.4"/>
-    </svg>
-  );
-}
 
 export default function Sidebar({ current, onNavigate }: { current: View; onNavigate: (v: View) => void; }) {
   const navigate = useNavigate();
@@ -49,8 +20,8 @@ export default function Sidebar({ current, onNavigate }: { current: View; onNavi
 
   useEffect(() => {
     const handler = (e: Event) => {
-      const ce = e as CustomEvent<any>;
-      setUser(ce.detail || null);
+      const ce = e as CustomEvent<unknown>;
+      setUser(ce.detail as typeof user || null);
     };
     window.addEventListener('auth:changed', handler as EventListener);
     return () => window.removeEventListener('auth:changed', handler as EventListener);
@@ -61,58 +32,120 @@ export default function Sidebar({ current, onNavigate }: { current: View; onNavi
     navigate('/login');
   };
 
-  return (
-  <aside className="hidden md:flex w-72 bg-linear-to-b from-[#0b1220] to-[#0e1724] p-6 text-slate-100 min-h-screen flex-col border-r-2 border-sky-700/20">
-      <div className="flex items-center gap-4 pb-4 border-b border-slate-800 mb-5">
-        <div className="w-12 h-12 rounded-lg bg-linear-to-br from-[#6a5cff] to-[#7ef0d9] flex items-center justify-center text-white text-lg">🎮</div>
-        <div className="text-sky-200 font-semibold">Friv 2.0</div>
-      </div>
+  const navItems = [
+    { view: 'dashboard' as View, icon: HomeIcon, label: 'Juegos', gradient: 'from-sky-500 to-blue-500' },
+    { view: 'ranking' as View, icon: TrophyIcon, label: 'Ranking', gradient: 'from-amber-500 to-orange-500' },
+    { view: 'score' as View, icon: ChartBarIcon, label: 'Mis Scores', gradient: 'from-emerald-500 to-green-500' },
+    { view: 'profile' as View, icon: UserCircleIcon, label: 'Perfil', gradient: 'from-purple-500 to-pink-500' },
+  ];
 
-  <div className="bg-[rgba(255,255,255,0.02)] p-4 rounded-xl mb-6 flex items-center gap-4 border border-sky-600/30 shadow-sm">
-        <div className="w-14 h-14 rounded-lg bg-linear-to-br from-[#8c5bff] to-[#6aa6ff] flex items-center justify-center font-bold text-white text-lg ring-2 ring-sky-500/20">
-          {user?.username?.slice(0, 2).toUpperCase() || 'IN'}
+  return (
+    <aside className="hidden md:flex w-72 bg-linear-to-b from-[#050d1a] via-[#071123] to-[#0a1628] p-6 text-slate-100 min-h-screen flex-col border-r border-slate-800/50 shadow-2xl">
+      {/* Logo/Brand */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center gap-4 pb-6 border-b border-slate-700/50 mb-6"
+      >
+        <div className="w-12 h-12 rounded-xl bg-linear-to-br from-sky-400 via-purple-500 to-pink-500 flex items-center justify-center text-2xl shadow-lg shadow-purple-500/30">
+          🎮
         </div>
         <div>
-          <div className="font-semibold text-white">{user?.username || 'Invitado'}</div>
-          {user?.hasPaid && <div className="text-amber-300 text-xs">Usuario Premium</div>}
+          <div className="text-xl font-bold bg-linear-to-r from-sky-400 to-purple-400 bg-clip-text text-transparent">
+            Friv 2.0
+          </div>
+          <div className="text-xs text-slate-500">Game Platform</div>
         </div>
-      </div>
+      </motion.div>
 
-      <nav className="flex flex-col gap-3">
-        <button onClick={() => onNavigate("dashboard")} className={`flex items-center gap-3 px-3 py-2 rounded-lg ${current === "dashboard" ? 'bg-linear-to-r from-[#5b34ff] to-[#b144ff] text-white shadow-lg' : 'text-slate-300 hover:bg-[rgba(255,255,255,0.02)]'}`}>
-          <span className="text-slate-200"><IconGames /></span>
-          <span className="flex-1 text-left">Juegos</span>
-        </button>
+      {/* User card */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.1 }}
+        className="relative bg-slate-900/40 backdrop-blur-sm p-4 rounded-xl mb-6 border border-slate-700/50 overflow-hidden"
+      >
+        {/* Background decoration */}
+        <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full blur-2xl"></div>
+        
+        <div className="relative flex items-center gap-4">
+          <div className="relative">
+            <div className="w-14 h-14 rounded-xl bg-linear-to-br from-purple-500 via-pink-500 to-purple-600 flex items-center justify-center font-bold text-white text-lg ring-2 ring-purple-500/30 shadow-lg shadow-purple-500/20">
+              {user?.username?.slice(0, 2).toUpperCase() || 'GU'}
+            </div>
+            {user?.hasPaid && (
+              <div className="absolute -bottom-1 -right-1 bg-amber-500 rounded-full p-1 border-2 border-slate-900">
+                <ShieldCheckIcon className="w-3 h-3 text-white" />
+              </div>
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="font-semibold text-white truncate">{user?.username || 'Invitado'}</div>
+            {user?.hasPaid && (
+              <div className="flex items-center gap-1.5 text-xs text-amber-300">
+                <SparklesIcon className="w-3 h-3" />
+                <span>Premium</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </motion.div>
 
-        <button onClick={() => onNavigate("ranking")} className={`flex items-center gap-3 px-3 py-2 rounded-lg ${current === "ranking" ? 'bg-linear-to-r from-[#5b34ff] to-[#b144ff] text-white shadow-lg' : 'text-slate-300 hover:bg-[rgba(255,255,255,0.02)]'}`}>
-          <span className="text-slate-400"><IconTrophy /></span>
-          <span className="flex-1 text-left">Ranking</span>
-        </button>
-
-        <button onClick={() => onNavigate("score")} className={`flex items-center gap-3 px-3 py-2 rounded-lg ${current === "score" ? 'bg-linear-to-r from-[#5b34ff] to-[#b144ff] text-white shadow-lg' : 'text-slate-300 hover:bg-[rgba(255,255,255,0.02)]'}`}>
-          <span className="text-slate-400"><IconChart /></span>
-          <span className="flex-1 text-left">Mis Scores</span>
-        </button>
-
-        <button onClick={() => onNavigate("profile")} className={`flex items-center gap-3 px-3 py-2 rounded-lg ${current === "profile" ? 'bg-linear-to-r from-[#5b34ff] to-[#b144ff] text-white shadow-lg' : 'text-slate-300 hover:bg-[rgba(255,255,255,0.02)]'}`}>
-          <span className="text-slate-400"><IconUser /></span>
-          <span className="flex-1 text-left">Perfil</span>
-        </button>
+      {/* Navigation */}
+      <nav className="flex flex-col gap-2">
+        {navItems.map((item, idx) => {
+          const Icon = item.icon;
+          const isActive = current === item.view;
+          
+          return (
+            <motion.button
+              key={item.view}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 + idx * 0.05 }}
+              onClick={() => onNavigate(item.view)}
+              className={`relative flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+                isActive 
+                  ? `bg-linear-to-r ${item.gradient} text-white shadow-lg` 
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+              }`}
+            >
+              {isActive && (
+                <motion.div 
+                  layoutId="activeTab"
+                  className="absolute inset-0 bg-linear-to-r ${item.gradient} rounded-lg"
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                />
+              )}
+              <Icon className="w-5 h-5 relative z-10" />
+              <span className="flex-1 text-left relative z-10">{item.label}</span>
+              {isActive && (
+                <motion.div 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="w-1.5 h-1.5 bg-white rounded-full relative z-10"
+                />
+              )}
+            </motion.button>
+          );
+        })}
       </nav>
 
-      <div className="mt-auto pt-6">
+      {/* Logout button */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        className="mt-auto pt-6 border-t border-slate-700/50"
+      >
         <button 
           onClick={handleLogout}
-          className="flex items-center gap-2 text-slate-400 text-sm hover:text-white hover:bg-red-500/10 w-full px-3 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-3 text-slate-400 text-sm hover:text-red-400 hover:bg-red-500/10 w-full px-4 py-3 rounded-lg transition-all duration-200 group"
         >
-          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M16 17l5-5-5-5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M21 12H9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          Cerrar Sesión
+          <ArrowRightOnRectangleIcon className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
+          <span className="font-medium">Cerrar Sesión</span>
         </button>
-      </div>
+      </motion.div>
     </aside>
   );
 }
