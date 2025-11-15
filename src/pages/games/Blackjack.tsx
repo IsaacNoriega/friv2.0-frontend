@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { motion, AnimatePresence } from 'framer-motion';
+import { TrophyIcon, FireIcon, SparklesIcon } from '@heroicons/react/24/solid';
 import GameInstructions from '../../components/GameInstructions';
 import { EndGameButton } from '../../components/EndGameButton';
 import { useGameScore } from '../../hooks/useGameScore';
@@ -98,57 +100,223 @@ export default function Blackjack() {
   function nextRound(){ setRound(r=>r+1); newGame(); }
 
   return (
-    <main className="p-6 text-slate-100 min-h-screen bg-[linear-gradient(180deg,#071123_0%,#071726_100%)] flex flex-col items-center">
-      <div className="max-w-4xl w-full">
-        <header className="flex flex-col md:flex-row items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-white">Blackjack - Ronda {round}</h1>
-            <p className="text-slate-400 text-sm">Acércate a 21 sin pasarte. Gana rondas y suma puntos.</p>
+    <main className="p-8 text-slate-100 min-h-screen bg-linear-to-br from-[#050d1a] via-[#071123] to-[#0a1628]">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* Header */}
+        <motion.header 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <div className="text-5xl">🃏</div>
+            <h1 className="text-5xl font-black bg-linear-to-r from-emerald-400 via-green-300 to-emerald-500 bg-clip-text text-transparent">
+              Blackjack
+            </h1>
           </div>
-          <div className="flex items-center gap-4 text-sm text-slate-300">
-            <div>Puntos: <span className="text-white font-bold">{score}</span></div>
-            {bestScore!==null && <div>Mejor: <span className="text-white font-semibold">{bestScore}</span></div>}
-            <EndGameButton />
-          </div>
-        </header>
+          <p className="text-slate-400 text-lg ml-16">Alcanza 21 sin pasarte y vence al dealer</p>
+        </motion.header>
 
-        <GameInstructions 
-          title="Cómo Jugar Blackjack"
-          description="Intenta llegar a 21 puntos sin pasarte. Las cartas numéricas valen su número, las figuras valen 10, y el As puede valer 1 u 11. Puedes pedir más cartas (Hit) o plantarte (Stand). Ganas si tu puntuación es mayor que la del dealer sin pasarte de 21."
-          controls={[
-            { key: 'Hit', action: 'Pedir otra carta' },
-            { key: 'Stand', action: 'Plantarse' }
-          ]}
-          note="Si te pasas de 21, pierdes automáticamente. El dealer debe pedir carta hasta tener 17 o más."
-        />
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 mb-6">
 
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-          <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-6 shadow-lg">
-            <h2 className="text-lg font-semibold mb-3">Dealer {gameOver?`(${dealerValue})`:''}</h2>
-            <div className="flex gap-3">
-              {dealer.map((c,i)=>(
-                <div key={i} className={`w-20 h-28 rounded-lg flex items-center justify-center text-xl font-bold border ${i===1 && !gameOver ? "bg-[#071826] text-transparent":"bg-white/5 text-white"} border-slate-700`}>
-                  <span className={`${i===1 && !gameOver ? "opacity-0":""}`}>{c.code}</span>
+          {/* LEFT: Stats & Controls */}
+          <motion.section 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <div className="bg-slate-900/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 space-y-4">
+              
+              {/* Round Badge */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <TrophyIcon className="w-6 h-6 text-emerald-400" />
+                  <span className="text-sm text-slate-400">Ronda</span>
                 </div>
-              ))}
-            </div>
-          </div>
+                <div className="px-4 py-2 bg-emerald-500/20 border border-emerald-500/40 rounded-lg">
+                  <span className="text-2xl font-black text-emerald-300">{round}</span>
+                </div>
+              </div>
 
-          <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-6 shadow-lg">
-            <h2 className="text-lg font-semibold mb-3">Tu mano ({playerValue})</h2>
-            <div className="flex gap-3 mb-4">{player.map((c,i)=>(
-              <div key={i} className="w-20 h-28 rounded-lg flex items-center justify-center text-xl font-bold border bg-white/5 text-white border-slate-700">{c.code}</div>
-            ))}</div>
-            <div className="flex gap-3 mb-3">
-              <button onClick={playerHit} disabled={gameOver} className="py-2 px-4 rounded-md bg-emerald-500 text-black font-semibold disabled:opacity-50">Hit</button>
-              <button onClick={playerStand} disabled={gameOver} className="py-2 px-4 rounded-md bg-amber-400 text-black font-semibold disabled:opacity-50">Stand</button>
+              {/* Score Card */}
+              <div className="p-4 bg-linear-to-br from-emerald-500/10 to-green-600/5 rounded-lg border border-emerald-500/30">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-emerald-300">Puntos Totales</span>
+                  <FireIcon className="w-5 h-5 text-emerald-400" />
+                </div>
+                <div className="text-4xl font-black bg-linear-to-r from-emerald-400 to-green-300 bg-clip-text text-transparent">
+                  {score.toLocaleString()}
+                </div>
+                {bestScore !== null && (
+                  <div className="text-xs text-slate-400 mt-1">
+                    Récord: {bestScore.toLocaleString()}
+                  </div>
+                )}
+              </div>
+
+              {/* Game Info */}
+              <div className="p-4 bg-slate-800/40 rounded-lg border border-slate-700/30">
+                <div className="flex items-center gap-2 mb-2">
+                  <SparklesIcon className="w-5 h-5 text-cyan-400" />
+                  <span className="text-sm font-medium text-cyan-300">Estado del Juego</span>
+                </div>
+                <AnimatePresence mode="wait">
+                  {message ? (
+                    <motion.p 
+                      key={message}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className={`text-sm font-semibold ${
+                        message.includes('Ganaste') || message.includes('Blackjack') 
+                          ? 'text-emerald-400' 
+                          : message.includes('Perdiste') || message.includes('pasaste')
+                          ? 'text-red-400'
+                          : 'text-amber-400'
+                      }`}
+                    >
+                      {message}
+                    </motion.p>
+                  ) : (
+                    <motion.p 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-slate-400 text-sm"
+                    >
+                      Esperando tu decisión...
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <button 
+                    onClick={playerHit} 
+                    disabled={gameOver}
+                    className="py-3 rounded-lg bg-linear-to-r from-emerald-500 to-green-600 text-black font-bold hover:from-emerald-600 hover:to-green-700 transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    🎯 Hit
+                  </button>
+                  <button 
+                    onClick={playerStand} 
+                    disabled={gameOver}
+                    className="py-3 rounded-lg bg-linear-to-r from-amber-500 to-orange-600 text-black font-bold hover:from-amber-600 hover:to-orange-700 transition-all shadow-lg shadow-amber-500/20 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    ✋ Stand
+                  </button>
+                </div>
+                
+                {gameOver && !message.includes("Fin del juego") && (
+                  <motion.button 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    onClick={nextRound}
+                    className="w-full py-3 rounded-lg bg-linear-to-r from-blue-500 to-cyan-600 text-white font-bold hover:from-blue-600 hover:to-cyan-700 transition-all shadow-lg shadow-blue-500/20"
+                  >
+                    ▶ Siguiente Ronda
+                  </motion.button>
+                )}
+              </div>
+
+              <EndGameButton onEnd={() => submitScore(score)} />
             </div>
-            {message && <div className="text-sm text-slate-200 mb-3">{message}</div>}
-            {gameOver && !message.includes("Fin del juego") &&
-              <button onClick={nextRound} className="px-4 py-1 bg-blue-500 hover:bg-blue-600 transition rounded text-white text-sm">Siguiente ronda</button>
-            }
-          </div>
-        </section>
+          </motion.section>
+
+          {/* RIGHT: Game Board */}
+          <motion.section 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="space-y-4 h-full flex flex-col justify-center">
+              {/* Dealer Hand */}
+              <div className="bg-slate-900/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-slate-200">🎩 Dealer</h2>
+                  {gameOver && (
+                    <div className="px-3 py-1 bg-slate-700/50 rounded-lg border border-slate-600">
+                      <span className="text-lg font-bold text-white">{dealerValue}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-3 flex-wrap">
+                  <AnimatePresence>
+                    {dealer.map((c, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, rotateY: -90, scale: 0.8 }}
+                        animate={{ opacity: 1, rotateY: 0, scale: 1 }}
+                        transition={{ delay: i * 0.1 }}
+                        className={`w-24 h-36 rounded-xl flex items-center justify-center text-2xl font-black border-2 shadow-xl ${
+                          i === 1 && !gameOver
+                            ? "bg-linear-to-br from-slate-700 to-slate-800 border-slate-600 text-transparent"
+                            : c.code.includes("♥") || c.code.includes("♦")
+                            ? "bg-white border-red-300 text-red-600"
+                            : "bg-white border-slate-300 text-slate-900"
+                        }`}
+                      >
+                        <span className={i === 1 && !gameOver ? "opacity-0" : ""}>
+                          {c.code}
+                        </span>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </div>
+
+              {/* Player Hand */}
+              <div className="bg-slate-900/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-emerald-400">👤 Tu Mano</h2>
+                  <div className="px-3 py-1 bg-emerald-500/20 rounded-lg border border-emerald-500/40">
+                    <span className="text-lg font-bold text-emerald-300">{playerValue}</span>
+                  </div>
+                </div>
+                <div className="flex gap-3 flex-wrap">
+                  <AnimatePresence>
+                    {player.map((c, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, rotateY: -90, scale: 0.8 }}
+                        animate={{ opacity: 1, rotateY: 0, scale: 1 }}
+                        transition={{ delay: i * 0.1 }}
+                        className={`w-24 h-36 rounded-xl flex items-center justify-center text-2xl font-black border-2 shadow-xl ${
+                          c.code.includes("♥") || c.code.includes("♦")
+                            ? "bg-white border-red-300 text-red-600"
+                            : "bg-white border-slate-300 text-slate-900"
+                        }`}
+                      >
+                        {c.code}
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </div>
+            </div>
+          </motion.section>
+
+        </div>
+
+        {/* BOTTOM ROW: Instructions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <GameInstructions 
+            title="Cómo Jugar Blackjack"
+            description="Intenta llegar a 21 puntos sin pasarte. Las cartas numéricas valen su número, las figuras valen 10, y el As puede valer 1 u 11. Puedes pedir más cartas (Hit) o plantarte (Stand). Ganas si tu puntuación es mayor que la del dealer sin pasarte de 21."
+            controls={[
+              { key: 'Hit', action: 'Pedir otra carta' },
+              { key: 'Stand', action: 'Plantarse' }
+            ]}
+            note="Si te pasas de 21, pierdes automáticamente. El dealer debe pedir carta hasta tener 17 o más."
+          />
+        </motion.div>
+
       </div>
     </main>
   );

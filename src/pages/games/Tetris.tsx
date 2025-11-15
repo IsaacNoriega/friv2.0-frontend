@@ -1,4 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from 'framer-motion';
+import { TrophyIcon, FireIcon, SparklesIcon } from '@heroicons/react/24/solid';
 import GameInstructions from '../../components/GameInstructions'
 import { EndGameButton } from '../../components/EndGameButton';
 import { useGameScore } from '../../hooks/useGameScore';
@@ -183,6 +185,9 @@ export default function Tetris() {
       if (gameOver) return;
       const p = pieceRef.current;
       if (!p) return;
+      if (e.key === "ArrowLeft" || e.key === "ArrowRight" || e.key === "ArrowUp" || e.key === "ArrowDown" || e.code === "Space") {
+        e.preventDefault();
+      }
       if (e.key === "ArrowLeft") {
         if (canPlace(p, grid, p.r, p.c - 1)) p.c -= 1;
       } else if (e.key === "ArrowRight") {
@@ -207,7 +212,7 @@ export default function Tetris() {
       }
       setGrid((g) => [...g]);
     }
-    window.addEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKey, { passive: false });
     return () => window.removeEventListener("keydown", onKey);
   }, [grid, gameOver, canPlace, lockPiece]);
 
@@ -242,65 +247,171 @@ export default function Tetris() {
   }, [spawn, gameOver]);
 
   return (
-    <main className="p-6 text-slate-100 min-h-screen bg-slate-900">
-      <div className="max-w-3xl mx-auto">
-        <header className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-semibold">Tetris</h1>
-          <div className="flex items-center gap-3">
-            <GameScoreDisplay 
-              currentScore={currentScore}
-              lastScore={lastScore}
-              bestScore={bestScore}
-            />
-            <EndGameButton />
-            <button
-              onClick={restart}
-              className="px-3 py-1 bg-[#0ea5e9] rounded text-black text-sm"
-            >
-              Restart
-            </button>
+    <main className="p-8 text-slate-100 min-h-screen bg-linear-to-br from-[#050d1a] via-[#071123] to-[#0a1628]">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* Header */}
+        <motion.header 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <div className="text-5xl">🧱</div>
+            <h1 className="text-5xl font-black bg-linear-to-r from-cyan-400 via-blue-300 to-cyan-500 bg-clip-text text-transparent">
+              Tetris
+            </h1>
           </div>
-  </header>
+          <p className="text-slate-400 text-lg ml-16">Completa líneas y alcanza el puntaje más alto</p>
+        </motion.header>
 
-        <GameInstructions 
-          title="Cómo Jugar Tetris"
-          description="Coloca las piezas que caen para formar líneas horizontales completas. Cuando completas una línea, desaparece y ganas puntos. El juego termina si las piezas llegan hasta arriba."
-          controls={[
-            { key: '←', action: 'Mover izquierda' },
-            { key: '→', action: 'Mover derecha' },
-            { key: '↓', action: 'Caída rápida' },
-            { key: '↑ / Z', action: 'Rotar pieza' }
-          ]}
-          note="Completa múltiples líneas a la vez para obtener más puntos. ¡Evita dejar huecos!"
-        />  <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4 overflow-auto">
-          <div style={{ width: COLS * 24, background: "#071123", padding: 6 }}>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: `repeat(${COLS}, 24px)`,
-                gap: 2,
-              }}
-            >
-              {drawGrid.flat().map((cell, i) => (
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 mb-6">
+
+          {/* LEFT: Stats & Controls */}
+          <motion.section 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <div className="bg-slate-900/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 space-y-4">
+              
+              {/* Score Cards */}
+              <div className="grid grid-cols-1 gap-4">
+                {/* Current Score */}
+                <div className="p-4 bg-linear-to-br from-cyan-500/10 to-blue-600/5 rounded-lg border border-cyan-500/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-cyan-300">Puntos</span>
+                    <FireIcon className="w-5 h-5 text-cyan-400" />
+                  </div>
+                  <div className="text-4xl font-black bg-linear-to-r from-cyan-400 to-blue-300 bg-clip-text text-transparent">
+                    {currentScore.toLocaleString()}
+                  </div>
+                </div>
+
+                {/* Best & Last Score */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 bg-slate-800/30 rounded-lg border border-slate-700/20">
+                    <div className="flex items-center gap-1 mb-1">
+                      <TrophyIcon className="w-4 h-4 text-amber-400" />
+                      <div className="text-slate-500 text-xs">Récord</div>
+                    </div>
+                    <div className="font-semibold text-white text-lg">
+                      {bestScore !== null ? bestScore.toLocaleString() : '0'}
+                    </div>
+                  </div>
+                  <div className="p-3 bg-slate-800/30 rounded-lg border border-slate-700/20">
+                    <div className="flex items-center gap-1 mb-1">
+                      <SparklesIcon className="w-4 h-4 text-purple-400" />
+                      <div className="text-slate-500 text-xs">Último</div>
+                    </div>
+                    <div className="font-semibold text-white text-lg">
+                      {lastScore !== null ? lastScore.toLocaleString() : '0'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Game Info */}
+              <div className="p-4 bg-slate-800/40 rounded-lg border border-slate-700/30">
+                <div className="flex items-center gap-2 mb-2">
+                  <SparklesIcon className="w-5 h-5 text-cyan-400" />
+                  <span className="text-sm font-medium text-cyan-300">Objetivo</span>
+                </div>
+                <p className="text-slate-300 text-sm">
+                  Completa líneas horizontales para eliminarlas y ganar puntos. 
+                  Cada línea vale 100 puntos. ¡Evita que las piezas lleguen arriba!
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                <button 
+                  onClick={restart} 
+                  className="flex-1 py-3 rounded-lg bg-linear-to-r from-cyan-500 to-blue-600 text-black font-bold hover:from-cyan-600 hover:to-blue-700 transition-all shadow-lg shadow-cyan-500/20"
+                >
+                  🔄 Reiniciar
+                </button>
+                <EndGameButton onEnd={() => submitScore(currentScore)} />
+              </div>
+
+              {/* Game Over */}
+              {gameOver && (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-2xl">💀</span>
+                    <span className="text-lg font-bold text-red-400">Game Over</span>
+                  </div>
+                  <p className="text-slate-300 text-sm">Las piezas llegaron hasta arriba</p>
+                </motion.div>
+              )}
+            </div>
+          </motion.section>
+
+          {/* RIGHT: Game Board */}
+          <motion.section 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-6 flex items-center justify-center">
+              <div 
+                className="bg-slate-950/60 rounded-xl p-2 border border-slate-800/50"
+                style={{ width: COLS * 28 + 16 }}
+              >
                 <div
-                  key={i}
+                  className="grid gap-1"
                   style={{
-                    width: 24,
-                    height: 24,
-                    background: cell || "#0b1220",
-                    borderRadius: 4,
-                    border: "1px solid rgba(255,255,255,0.05)",
+                    gridTemplateColumns: `repeat(${COLS}, 28px)`,
                   }}
-                />
-              ))}
+                >
+                  <AnimatePresence>
+                    {drawGrid.flat().map((cell, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="rounded-md"
+                        style={{
+                          width: 28,
+                          height: 28,
+                          background: cell || "#0b1220",
+                          border: cell ? "2px solid rgba(255,255,255,0.2)" : "1px solid rgba(255,255,255,0.03)",
+                          boxShadow: cell ? `0 0 10px ${cell}40` : 'none'
+                        }}
+                      />
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </div>
             </div>
-          </div>
-          {gameOver && (
-            <div className="mt-4 text-center text-white font-semibold">
-              Game Over
-            </div>
-          )}
+          </motion.section>
+
         </div>
+
+        {/* BOTTOM ROW: Instructions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <GameInstructions 
+            title="Cómo Jugar Tetris"
+            description="Coloca las piezas que caen para formar líneas horizontales completas. Cuando completas una línea, desaparece y ganas puntos. El juego termina si las piezas llegan hasta arriba."
+            controls={[
+              { key: '←', action: 'Mover izquierda' },
+              { key: '→', action: 'Mover derecha' },
+              { key: '↓', action: 'Caída rápida' },
+              { key: '↑', action: 'Rotar pieza' },
+              { key: 'Espacio', action: 'Caída instantánea' }
+            ]}
+            note="Completa múltiples líneas a la vez para obtener más puntos. ¡Evita dejar huecos!"
+          />
+        </motion.div>
+
       </div>
     </main>
   );

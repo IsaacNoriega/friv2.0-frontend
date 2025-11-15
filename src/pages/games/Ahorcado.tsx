@@ -1,4 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
+import { motion, AnimatePresence } from 'framer-motion';
+import { TrophyIcon, FireIcon, HeartIcon, LightBulbIcon } from '@heroicons/react/24/solid';
 import GameInstructions from '../../components/GameInstructions';
 import { EndGameButton } from '../../components/EndGameButton';
 import { useGameScore } from '../../hooks/useGameScore';
@@ -60,14 +62,28 @@ type HangmanDrawingProps = {
 
 function HangmanDrawing({ numberOfGuesses }: HangmanDrawingProps) {
   return (
-    <div className="w-full h-64 mb-4 flex justify-center items-end overflow-hidden">
-      <svg width="250" height="250" viewBox="0 0 250 250" className="flex-shrink-0">
-        <line x1="10" y1="240" x2="150" y2="240" stroke="white" strokeWidth="6" />
-        <line x1="80" y1="240" x2="80" y2="20" stroke="white" strokeWidth="6" />
-        <line x1="80" y1="20" x2="165" y2="20" stroke="white" strokeWidth="6" />
-        <line x1="165" y1="20" x2="165" y2="45" stroke="white" strokeWidth="4" />
+    <div className="w-full h-72 mb-6 flex justify-center items-center">
+      <svg width="280" height="280" viewBox="0 0 250 250" className="drop-shadow-2xl">
+        {/* Base */}
+        <line x1="10" y1="240" x2="150" y2="240" stroke="#94a3b8" strokeWidth="6" strokeLinecap="round" />
+        {/* Pole */}
+        <line x1="80" y1="240" x2="80" y2="20" stroke="#94a3b8" strokeWidth="6" strokeLinecap="round" />
+        {/* Top bar */}
+        <line x1="80" y1="20" x2="165" y2="20" stroke="#94a3b8" strokeWidth="6" strokeLinecap="round" />
+        {/* Rope */}
+        <line x1="165" y1="20" x2="165" y2="45" stroke="#94a3b8" strokeWidth="4" strokeLinecap="round" />
 
-        {BODY_PARTS_SVG.slice(0, numberOfGuesses)}
+        {/* Body parts with gradient colors */}
+        {BODY_PARTS_SVG.slice(0, numberOfGuesses).map((part, i) => (
+          <motion.g
+            key={`part-${i}`}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: i * 0.1, type: "spring" }}
+          >
+            {part}
+          </motion.g>
+        ))}
       </svg>
     </div>
   );
@@ -164,106 +180,229 @@ export default function AhorcadoArcade() {
 
   if (!gameStarted) {
     return (
-      <main className="p-6 text-slate-100 min-h-screen flex flex-col items-center justify-center bg-[linear-gradient(180deg,#071123_0%,#071726_100%)]">
-        <h1 className="text-4xl font-bold mb-4">🎯 Ahorcado Arcade</h1>
-        <p className="text-slate-400 mb-6">Adivina tantas palabras como puedas y gana puntos.</p>
-        <button
-          onClick={startGame}
-          className="py-3 px-6 rounded-xl bg-linear-to-r from-[#5b34ff] to-[#ff3fb6] text-white font-semibold"
+      <main className="p-8 text-slate-100 min-h-screen bg-linear-to-br from-[#050d1a] via-[#071123] to-[#0a1628] flex items-center justify-center">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center p-12 bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-slate-700/50 max-w-md"
         >
-          Empezar juego
-        </button>
+          <div className="text-7xl mb-4">🎯</div>
+          <h1 className="text-4xl font-black mb-3 bg-linear-to-r from-rose-400 to-orange-300 bg-clip-text text-transparent">
+            Ahorcado Arcade
+          </h1>
+          <p className="text-slate-400 mb-6">Adivina tantas palabras como puedas y gana puntos</p>
+          <button
+            onClick={startGame}
+            className="px-8 py-4 rounded-xl bg-linear-to-r from-rose-500 to-orange-600 text-white text-lg font-black hover:from-rose-600 hover:to-orange-700 transition-all shadow-2xl shadow-rose-500/30"
+          >
+            ▶ Empezar Juego
+          </button>
+        </motion.div>
       </main>
     );
   }
 
   return (
-    <main className="p-6 text-slate-100 min-h-screen bg-[linear-gradient(180deg,#071123_0%,#071726_100%)] flex flex-col items-center">
-      <div className="max-w-lg w-full">
-        <header className="flex items-center justify-between mb-5">
-          <div>
-            <h1 className="text-3xl font-bold">Ahorcado Arcade</h1>
-            <p className="text-slate-400 text-sm">Adivina tantas palabras como puedas.</p>
+    <main className="p-8 text-slate-100 min-h-screen bg-linear-to-br from-[#050d1a] via-[#071123] to-[#0a1628]">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* Header */}
+        <motion.header 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <div className="text-5xl">🎯</div>
+            <h1 className="text-5xl font-black bg-linear-to-r from-rose-400 via-orange-300 to-rose-500 bg-clip-text text-transparent">
+              Ahorcado
+            </h1>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="text-sm text-slate-300">
-              <div>Ronda: <span className="text-white font-semibold">{round}</span></div>
-              <div>Puntos: <span className="text-white font-semibold">{score}</span></div>
-              <div>Mejor: <span className="text-white font-semibold">{bestScore ?? 0}</span></div>
-              {scoreError && <div className="text-red-500">{scoreError}</div>}
+          <p className="text-slate-400 text-lg ml-16">Adivina la palabra antes de que se complete el dibujo</p>
+        </motion.header>
+
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 mb-6">
+
+          {/* LEFT: Stats & Controls */}
+          <motion.section 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <div className="bg-slate-900/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 space-y-4 h-full">
+              
+              {/* Round Badge */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <TrophyIcon className="w-6 h-6 text-rose-400" />
+                  <span className="text-sm text-slate-400">Ronda</span>
+                </div>
+                <div className="px-4 py-2 bg-rose-500/20 border border-rose-500/40 rounded-lg">
+                  <span className="text-2xl font-black text-rose-300">{round}</span>
+                </div>
+              </div>
+
+              {/* Score Card */}
+              <div className="p-4 bg-linear-to-br from-rose-500/10 to-orange-600/5 rounded-lg border border-rose-500/30">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-rose-300">Puntos</span>
+                  <FireIcon className="w-5 h-5 text-rose-400" />
+                </div>
+                <div className="text-4xl font-black bg-linear-to-r from-rose-400 to-orange-300 bg-clip-text text-transparent">
+                  {score.toLocaleString()}
+                </div>
+                <div className="text-xs text-slate-400 mt-1">
+                  Récord: {(bestScore ?? 0).toLocaleString()}
+                </div>
+                {scoreError && <div className="text-red-400 text-xs mt-1">{scoreError}</div>}
+              </div>
+
+              {/* Errors */}
+              <div className="p-4 bg-slate-800/40 rounded-lg border border-slate-700/30">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-slate-400">Intentos restantes</span>
+                  <HeartIcon className="w-5 h-5 text-red-400" />
+                </div>
+                <div className="flex gap-1">
+                  {Array.from({ length: MAX_WRONG }).map((_, i) => (
+                    <HeartIcon 
+                      key={i} 
+                      className={`w-6 h-6 ${i < (MAX_WRONG - wrong) ? 'text-red-500' : 'text-slate-700'}`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Hint */}
+              <div className="p-4 bg-linear-to-br from-amber-500/10 to-yellow-600/5 rounded-lg border border-amber-500/30">
+                <div className="flex items-center gap-2 mb-2">
+                  <LightBulbIcon className="w-5 h-5 text-amber-400" />
+                  <span className="text-sm text-amber-300 font-medium">Pista</span>
+                </div>
+                <p className="text-slate-300 text-sm italic">
+                  {gameOver ? `La palabra era: ${word}` : hint}
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                {gameOver && (
+                  <button 
+                    onClick={restart}
+                    className="flex-1 py-3 rounded-lg bg-linear-to-r from-rose-500 to-orange-600 text-white font-bold hover:from-rose-600 hover:to-orange-700 transition-all shadow-lg shadow-rose-500/20"
+                  >
+                    🔄 Reiniciar
+                  </button>
+                )}
+                <EndGameButton onEnd={() => submitScore(score)} />
+              </div>
+
+              {/* Status Messages */}
+              <AnimatePresence mode="wait">
+                {won && !gameOver && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">✅</span>
+                      <span className="text-lg font-bold text-green-400">¡Correcto! Siguiente ronda...</span>
+                    </div>
+                  </motion.div>
+                )}
+                {gameOver && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg"
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl">💀</span>
+                      <span className="text-lg font-bold text-red-400">Fin del Juego</span>
+                    </div>
+                    <p className="text-slate-300 text-sm">Puntaje final: {score}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-            <EndGameButton />
-          </div>
-        </header>
+          </motion.section>
 
-        <GameInstructions
-          title="Cómo Jugar Ahorcado"
-          description="Adivina la palabra oculta letra por letra. Cada letra incorrecta dibuja una parte del ahorcado. Tienes 6 intentos antes de perder. Usa la pista para ayudarte."
-          controls={[
-            { key: 'Clic / Teclado', action: 'Seleccionar letra' }
-          ]}
-          note="Ganas puntos por cada ronda. ¡Los errores te restan puntos de bonificación!"
-        />
+          {/* RIGHT: Game Board */}
+          <motion.section 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-6 h-full flex flex-col">
+              
+              {/* Hangman Drawing */}
+              <HangmanDrawing numberOfGuesses={wrong} />
 
-        <div className="bg-[#0e1b26] rounded-xl border border-slate-700 p-6 shadow-xl text-center">
-
-          <HangmanDrawing numberOfGuesses={wrong} />
-
-          <p className="text-slate-300 mb-2">
-            Errores: <span className="text-white font-semibold">{wrong}/{MAX_WRONG}</span>
-          </p>
-
-          <h2 className="text-3xl font-mono tracking-widest mb-4">{revealed}</h2>
-
-          <p className="text-lg text-sky-300 italic mb-6 h-6">
-            {gameOver ? `La palabra era: ${word}` : `Pista: ${hint}`}
-          </p>
-
-          <div className="flex flex-wrap gap-2 justify-center mb-4">
-            {LETTERS.map(l => {
-              const used = guessed.has(l);
-              const correct = word?.includes(l);
-
-              return (
-                <button
-                  key={l}
-                  onClick={() => guess(l)}
-                  disabled={used || gameOver || won}
-                  className={`
-                    w-9 h-9 sm:w-10 sm:h-10 rounded font-semibold transition
-                    disabled:opacity-50
-                    ${
-                      used
-                        ? (correct ? "bg-green-600 text-white" : "bg-red-600 text-white opacity-40")
-                        : "bg-slate-800 hover:bg-slate-700 text-slate-100"
-                    }
-                  `}
+              {/* Word Display */}
+              <div className="mb-6 text-center">
+                <motion.h2 
+                  key={revealed}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-4xl font-mono tracking-widest font-bold text-white"
                 >
-                  {l}
-                </button>
-              );
-            })}
-          </div>
+                  {revealed}
+                </motion.h2>
+              </div>
 
-          {won && !gameOver && (
-            <p className="text-green-400 font-semibold text-lg">
-                ¡Correcto! Siguiente ronda...
-            </p>
-          )}
+              {/* Letter Grid */}
+              <div className="flex flex-wrap gap-2 justify-center">
+                {LETTERS.map(l => {
+                  const used = guessed.has(l);
+                  const correct = word?.includes(l);
 
-          {gameOver && (
-            <div className="mt-4 text-red-400 font-semibold">
-              <p className="text-xl"> Fin del juego </p>
-              <p className="text-base text-slate-300">Puntaje final: {score}</p>
-              <button
-                onClick={restart}
-                className="mt-3 px-4 py-2 bg-linear-to-r from-[#5b34ff] to-[#ff3fb6] rounded-xl text-white font-semibold"
-              >
-                Reiniciar
-              </button>
+                  return (
+                    <motion.button
+                      key={l}
+                      whileHover={{ scale: used || gameOver || won ? 1 : 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => guess(l)}
+                      disabled={used || gameOver || won}
+                      className={`
+                        w-11 h-11 rounded-lg font-black text-lg transition-all shadow-lg
+                        ${
+                          used
+                            ? (correct 
+                                ? "bg-linear-to-br from-green-500 to-emerald-600 text-white ring-2 ring-green-400" 
+                                : "bg-slate-700/40 text-slate-500 opacity-40")
+                            : "bg-slate-700/60 hover:bg-slate-600 text-white border border-slate-600 hover:border-rose-500/50"
+                        }
+                        disabled:cursor-not-allowed
+                      `}
+                    >
+                      {l}
+                    </motion.button>
+                  );
+                })}
+              </div>
             </div>
-          )}
+          </motion.section>
+
         </div>
+
+        {/* BOTTOM ROW: Instructions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <GameInstructions
+            title="Cómo Jugar Ahorcado"
+            description="Adivina la palabra oculta letra por letra. Cada letra incorrecta dibuja una parte del ahorcado. Tienes 6 intentos antes de perder. Usa la pista para ayudarte."
+            controls={[
+              { key: 'Clic / Teclado', action: 'Seleccionar letra' }
+            ]}
+            note="Ganas puntos por cada ronda. ¡Los errores te restan puntos de bonificación!"
+          />
+        </motion.div>
+
       </div>
     </main>
   );
