@@ -145,7 +145,7 @@ export default function Connect4() {
   if (!gameStarted) {
     return (
       <main className="p-6 text-slate-100 min-h-screen flex flex-col items-center justify-center bg-[linear-gradient(180deg,#071123_0%,#071726_100%)]">
-        <h1 className="text-4xl font-bold mb-4">Conecta 4 vs CPU 🤖</h1>
+        <h1 className="text-4xl font-bold mb-4">Conecta 4 vs CPU </h1>
         <p className="text-slate-400 mb-6 text-center max-w-md">
           Selecciona la dificultad y compite contra la CPU. Cada victoria suma puntos y aumenta tu récord.
         </p>
@@ -247,10 +247,10 @@ export default function Connect4() {
           {winner !== null && (
             <div className="mt-3 text-white text-center">
               {winner === 0
-                ? "Empate 🤝"
+                ? "Empate "
                 : winner === 1
                 ? "¡Ganaste la ronda! 🎉"
-                : "CPU gana 😔"}
+                : "CPU gana "}
             </div>
           )}
           {cpuThinking && (
