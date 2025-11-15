@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
+import { TrophyIcon, FireIcon } from '@heroicons/react/24/solid'
 import GameInstructions from '../../components/GameInstructions'
 import { EndGameButton } from '../../components/EndGameButton'
 import { useGameScore } from '../../hooks/useGameScore';
@@ -75,13 +77,9 @@ export default function Snake() {
         setDir(newDir)
         dirRef.current = newDir
       }
-
-      if (key === ' ') {
-        setRunning(r => !r)
-      }
     }
 
-    document.addEventListener('keydown', onKey)
+    document.addEventListener('keydown', onKey, { passive: false })
     return () => document.removeEventListener('keydown', onKey)
   }, [])
 
@@ -98,11 +96,7 @@ export default function Snake() {
 
         if (prev.some(p => p.x === nx && p.y === ny)) {
           setRunning(false)
-
-          if (score > (serverBestScore || 0)) {
-            submitScore(score).catch(console.error)
-          }
-
+          submitScore(score).catch(console.error)
           return prev
         }
 
@@ -132,99 +126,144 @@ export default function Snake() {
   }
 
   return (
-    <main className="p-6 text-slate-100 min-h-screen bg-[linear-gradient(180deg,#071123_0%,#071726_100%)]">
-      <div className="max-w-3xl mx-auto">
-        <header className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-semibold">Snake</h1>
-            <p className="text-slate-400 text-sm">
-              Usa las flechas o WASD para mover. Barra espaciadora: pausar / reanudar.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <div className="text-sm mb-1">
-                🐍 Puntos: <span className="font-bold">{score}</span>
-              </div>
-              <div className="text-xs text-slate-400">
-                Récord: <span className="font-bold">{serverBestScore ?? 0}</span>
-              </div>
-              {scoreError && (
-                <div className="text-red-500 text-xs">{scoreError}</div>
-              )}
-            </div>
-
-            <button
-              onClick={reset}
-              className="py-1 px-3 rounded-md bg-linear-to-r from-[#5b34ff] to-[#ff3fb6] text-white text-sm"
-            >
-              Reiniciar
-            </button>
-
-            <EndGameButton
-              onEnd={() => {
-                if (score > (serverBestScore || 0)) {
-                  submitScore(score).catch(console.error)
-                }
-              }}
-            />
-          </div>
-        </header>
-
-        <GameInstructions
-          title="Cómo Jugar Snake"
-          description="Controla la serpiente para comer la comida roja. Cada vez que comes, la serpiente crece y ganas puntos. ¡Evita chocar contigo mismo!"
-          controls={[
-            { key: '↑ / W', action: 'Mover arriba' },
-            { key: '↓ / S', action: 'Mover abajo' },
-            { key: '← / A', action: 'Mover izquierda' },
-            { key: '→ / D', action: 'Mover derecha' }
-          ]}
-          note="La serpiente nunca se detiene. Planea tu camino."
-        />
-
-        <section
-          ref={gameRef}
-          tabIndex={0}
-          className="bg-[#0e1b26] rounded-xl border border-slate-800 p-4"
+    <main className="p-8 text-slate-100 min-h-screen bg-linear-to-br from-[#050d1a] via-[#071123] to-[#0a1628]">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* Header */}
+        <motion.header 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
         >
-          <div
-            style={{ gridTemplateColumns: `repeat(${COLS}, 1fr)` }}
-            className="grid gap-0 w-full border border-green-950"
-          >
-            {Array.from({ length: ROWS }).map((_, r) =>
-              Array.from({ length: COLS }).map((__, c) => {
-                const isSnake = snake.some(s => s.x === c && s.y === r)
-                const isHead = snake[0].x === c && snake[0].y === r
-                const isFood = food.x === c && food.y === r
-
-                const baseColor =
-                  (r + c) % 2 === 0 ? 'bg-green-800' : 'bg-green-900'
-
-                return (
-                  <div
-                    key={`${r}-${c}`}
-                    className={`
-                      w-full h-6 sm:h-8 md:h-10 border border-green-950 flex items-center justify-center
-                      ${
-                        isFood
-                          ? 'bg-amber-400 text-black'
-                          : isHead
-                          ? 'bg-purple-400 text-black'
-                          : isSnake
-                          ? 'bg-purple-600'
-                          : baseColor
-                      }
-                    `}
-                  >
-                    {isFood ? '🍎' : ''}
-                  </div>
-                )
-              })
-            )}
+          <div className="flex items-center gap-3 mb-2">
+            <div className="text-5xl">🐍</div>
+            <h1 className="text-5xl font-black bg-linear-to-r from-lime-400 via-green-300 to-lime-500 bg-clip-text text-transparent">
+              Snake
+            </h1>
           </div>
-        </section>
+          <p className="text-slate-400 text-lg ml-16">Come la manzana y crece sin chocarte contigo mismo</p>
+        </motion.header>
+
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 mb-6">
+
+          {/* LEFT: Stats & Controls */}
+          <motion.section 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <div className="bg-slate-900/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 space-y-4 h-full">
+              
+              {/* Score Card */}
+              <div className="p-4 bg-linear-to-br from-lime-500/10 to-green-600/5 rounded-lg border border-lime-500/30">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-lime-300">Puntos</span>
+                  <FireIcon className="w-5 h-5 text-lime-400" />
+                </div>
+                <div className="text-4xl font-black bg-linear-to-r from-lime-400 to-green-300 bg-clip-text text-transparent">
+                  {score}
+                </div>
+                <div className="text-xs text-slate-400 mt-1">
+                  Récord: {serverBestScore ?? 0}
+                </div>
+                {scoreError && <div className="text-red-400 text-xs mt-1">{scoreError}</div>}
+              </div>
+
+              {/* Length */}
+              <div className="p-4 bg-slate-800/40 rounded-lg border border-slate-700/30">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-slate-400">Longitud de la serpiente</span>
+                  <TrophyIcon className="w-5 h-5 text-green-400" />
+                </div>
+                <div className="text-3xl font-bold text-green-300">
+                  {snake.length}
+                </div>
+              </div>
+
+              {/* Controls */}
+              <button
+                onClick={reset}
+                className="w-full py-3 rounded-lg bg-linear-to-r from-lime-500 to-green-600 text-white font-bold hover:from-lime-600 hover:to-green-700 transition-all shadow-lg shadow-lime-500/20"
+              >
+                🔄 Reiniciar
+              </button>
+
+              {/* Action Button */}
+              <EndGameButton onEnd={() => submitScore(score)} />
+            </div>
+          </motion.section>
+
+          {/* RIGHT: Game Board */}
+          <motion.section 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div 
+              ref={gameRef}
+              tabIndex={0}
+              className="bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-6 h-full flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-lime-500/50"
+            >
+              <div
+                style={{ gridTemplateColumns: `repeat(${COLS}, 1fr)` }}
+                className="grid gap-0.5 border-2 border-lime-600/30 rounded-lg overflow-hidden shadow-2xl shadow-lime-500/20"
+              >
+                {Array.from({ length: ROWS }).map((_, r) =>
+                  Array.from({ length: COLS }).map((__, c) => {
+                    const isSnake = snake.some(s => s.x === c && s.y === r)
+                    const isHead = snake[0].x === c && snake[0].y === r
+                    const isFood = food.x === c && food.y === r
+
+                    const baseColor = (r + c) % 2 === 0 ? 'bg-slate-800/60' : 'bg-slate-800/40'
+
+                    return (
+                      <motion.div
+                        key={`${r}-${c}`}
+                        initial={isFood ? { scale: 0 } : undefined}
+                        animate={isFood ? { scale: 1 } : undefined}
+                        className={`
+                          w-full aspect-square flex items-center justify-center text-lg
+                          ${
+                            isFood
+                              ? 'bg-red-500 shadow-lg shadow-red-500/50'
+                              : isHead
+                              ? 'bg-linear-to-br from-lime-400 to-green-500 shadow-lg shadow-lime-500/50'
+                              : isSnake
+                              ? 'bg-linear-to-br from-lime-500 to-green-600'
+                              : baseColor
+                          }
+                        `}
+                      >
+                        {isFood ? '🍎' : ''}
+                      </motion.div>
+                    )
+                  })
+                )}
+              </div>
+            </div>
+          </motion.section>
+
+        </div>
+
+        {/* BOTTOM ROW: Instructions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <GameInstructions
+            title="Cómo Jugar Snake"
+            description="Controla la serpiente para comer la manzana roja. Cada vez que comes, la serpiente crece y ganas puntos. ¡Evita chocar contigo mismo!"
+            controls={[
+              { key: '↑ / W', action: 'Mover arriba' },
+              { key: '↓ / S', action: 'Mover abajo' },
+              { key: '← / A', action: 'Mover izquierda' },
+              { key: '→ / D', action: 'Mover derecha' }
+            ]}
+            note="La serpiente nunca se detiene. Planea tu camino con cuidado."
+          />
+        </motion.div>
+
       </div>
     </main>
   )
