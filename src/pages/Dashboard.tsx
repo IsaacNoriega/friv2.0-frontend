@@ -13,7 +13,6 @@ const premiumGames = [
   { title: 'Battle Ship', desc: 'Estrategia naval por turnos', record: '--', colorFrom: '#0ea5e9', colorTo: '#0369a1', route: '/battleship' },
   { title: 'Sudoku', desc: 'Desafío lógico por números', record: '--', colorFrom: '#7c3aed', colorTo: '#6d28d9', route: '/sudoku' },
   { title: 'Flappy Bird', desc: 'Física precisa y reflejos', record: '--', colorFrom: '#06b6d4', colorTo: '#0891b2', route: '/flappy' },
-  { title: 'Show Down', desc: 'Minijuego competitivo', record: '--', colorFrom: '#f43f5e', colorTo: '#ef4444', route: '/showdown' },
 ];
 
 // Free games should exclude premium titles above to avoid duplication
@@ -47,7 +46,7 @@ export default function Dashboard() {
   const generateTestScores = async () => {
     const games = [
       'memorama', 'blackjack', 'flappy', '2048', 'tetris', 'pacman', 'ahorcado',
-      'minesweeper', 'snake', 'battleship', 'connect4', 'sudoku', 'showdown', 'simondice', 'clicker'
+      'minesweeper', 'snake', 'battleship', 'connect4', 'sudoku', 'simondice', 'clicker'
     ];
 
     const tasks = games.map((g) => {

@@ -1,4 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from 'framer-motion';
+import { TrophyIcon, FireIcon, RocketLaunchIcon, PlayIcon, ArrowPathIcon } from '@heroicons/react/24/solid';
 import GameInstructions from '../../components/GameInstructions';
 import { EndGameButton } from '../../components/EndGameButton';
 import { useGameScore } from '../../hooks/useGameScore';
@@ -124,101 +126,231 @@ export default function BattleshipRounds() {
 
   if (!gameStarted) {
     return (
-      <main className="p-6 text-slate-100 min-h-screen flex flex-col items-center justify-center bg-[linear-gradient(180deg,#071123_0%,#071726_100%)]">
-        <h1 className="text-4xl font-bold mb-4">⚓ Battleship</h1>
-        <p className="text-slate-400 mb-6">Destruye todos los barcos por ronda y gana puntos.</p>
-        <button
-          onClick={startGame}
-          className="py-3 px-6 rounded-xl bg-linear-to-r from-[#5b34ff] to-[#ff3fb6] text-white font-semibold"
+      <main className="p-8 text-slate-100 min-h-screen bg-linear-to-br from-[#050d1a] via-[#071123] to-[#0a1628] flex items-center justify-center">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center p-12 bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-slate-700/50 max-w-md"
         >
-          Empezar juego
-        </button>
+          <div className="text-7xl mb-4">⚓</div>
+          <h1 className="text-4xl font-black mb-3 bg-linear-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+            Battleship
+          </h1>
+          <p className="text-slate-400 mb-6">Destruye todos los barcos por ronda y gana puntos</p>
+          <button
+            onClick={startGame}
+            className="px-8 py-4 rounded-xl bg-linear-to-r from-blue-500 to-cyan-600 text-white text-lg font-black hover:from-blue-600 hover:to-cyan-700 transition-all shadow-2xl shadow-blue-500/30 flex items-center justify-center gap-2 mx-auto"
+          >
+            <PlayIcon className="w-5 h-5" />
+            Empezar Juego
+          </button>
+        </motion.div>
       </main>
     );
   }
 
   return (
-    <main className="p-6 text-slate-100 min-h-screen bg-[linear-gradient(180deg,#071123_0%,#071726_100%)] flex flex-col items-center justify-center">
-      <div className="max-w-3xl mx-auto text-center">
-        {/* Header uniforme */}
-        <header className="flex flex-col md:flex-row items-center justify-between mb-6 gap-3">
-          <div>
-            <h1 className="text-3xl font-bold text-[#0ea5e9]">Battleship ⚓</h1>
-            <p className="text-slate-400 text-sm">Modo por rondas</p>
+    <main className="p-8 text-slate-100 min-h-screen bg-linear-to-br from-[#050d1a] via-[#071123] to-[#0a1628]">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* Header */}
+        <motion.header 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <div className="text-5xl">⚓</div>
+            <h1 className="text-5xl font-black bg-linear-to-r from-blue-400 via-cyan-300 to-blue-500 bg-clip-text text-transparent">
+              Battleship
+            </h1>
           </div>
-          <div className="flex items-center gap-5 text-sm text-slate-300">
-            <div>Ronda: <span className="text-white font-semibold">{round}</span></div>
-            <div>Puntos: <span className="text-white font-semibold">{score}</span></div>
-            <div>Tiros: <span className="text-white font-semibold">{shots}/{MAX_SHOTS_PER_ROUND}</span></div>
-            <div>Precisión: <span className="text-white font-semibold">{accuracy}%</span></div>
-            <EndGameButton />
-            <button
-              onClick={restart}
-              className="px-3 py-1 bg-linear-to-r from-[#5b34ff] to-[#ff3fb6] text-white font-semibold rounded-xl"
-            >
-              Reiniciar
-            </button>
-          </div>
-        </header>
+          <p className="text-slate-400 text-lg ml-16">Destruye todos los barcos antes de quedarte sin tiros</p>
+        </motion.header>
 
-        <GameInstructions 
-          title="Cómo Jugar Battleship"
-          description="Coloca tus barcos en el tablero y ataca las coordenadas del oponente para hundir su flota. Cuando aciertes, verás 'HIT'. Cuando falles, verás 'MISS'. El primero en hundir todos los barcos del rival gana."
-          controls={[
-            { key: 'Clic', action: 'Colocar barco / Atacar' }
-          ]}
-          note="Usa un patrón de búsqueda sistemático. Cuando aciertes, ataca las casillas adyacentes para hundir el barco completo."
-        />
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 mb-6">
 
-        {/* Tablero */}
-        <div className="bg-[#0e1b26] rounded-xl border border-slate-800 p-5 inline-block shadow-lg">
-          <div
-            style={{ display: "grid", gridTemplateColumns: `repeat(${SIZE}, 38px)`, gap: 6 }}
+          {/* LEFT: Stats & Controls */}
+          <motion.section 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+            className="space-y-6"
           >
-            {board!.flat().map((cell, i) => {
-              const r = Math.floor(i / SIZE);
-              const c = i % SIZE;
-              const show = cell.hit;
-              const isShip = cell.ship !== null;
-              const cellColor = show
-                ? isShip ? "#ef4444" : "#1f2937"
-                : "#0b1220";
-              const emoji = show ? (isShip ? "💥" : "💦") : "";
-              return (
-                <button
-                  key={i}
-                  onClick={() => shoot(r, c)}
-                  disabled={gameOver || allSunk}
-                  style={{ width: 38, height: 38, background: cellColor, borderRadius: 6, transition: "background 0.2s" }}
-                  className="flex items-center justify-center font-bold text-white hover:brightness-125"
-                >
-                  {emoji}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="mt-4 text-white">
-            <div>Barcos hundidos: <span className="font-semibold text-[#0ea5e9]">{sunk}/{totalShips}</span></div>
-            {allSunk && (
-              <div className="mt-3 text-green-400 font-bold text-lg animate-pulse">
-                ¡Ronda completada! 🚀 +500 puntos
+            {/* Stats Card */}
+            <div className="bg-slate-900/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 space-y-4">
+              
+              {/* Round & Score */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-linear-to-br from-blue-500/10 to-cyan-600/5 rounded-lg border border-blue-500/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-blue-300">Ronda</span>
+                    <TrophyIcon className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <div className="text-4xl font-black text-blue-300">{round}</div>
+                </div>
+                <div className="p-4 bg-linear-to-br from-cyan-500/10 to-blue-600/5 rounded-lg border border-cyan-500/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-cyan-300">Puntos</span>
+                    <FireIcon className="w-5 h-5 text-cyan-400" />
+                  </div>
+                  <div className="text-4xl font-black text-cyan-300">{score}</div>
+                </div>
               </div>
-            )}
-            {gameOver && (
-              <div className="mt-4 text-red-400 font-bold text-lg">
-                💀 Fin del juego — Puntaje final: {score}
-                <br />
-                <button
-                  onClick={restart}
-                  className="mt-3 px-4 py-2 bg-linear-to-r from-[#5b34ff] to-[#ff3fb6] text-white font-semibold rounded-xl"
+
+              {/* Game Stats */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 bg-slate-800/40 rounded-lg border border-slate-700/30">
+                  <div className="text-xs text-slate-400 mb-1">Tiros</div>
+                  <div className="text-2xl font-bold text-white">{shots}/{MAX_SHOTS_PER_ROUND}</div>
+                </div>
+                <div className="p-3 bg-slate-800/40 rounded-lg border border-slate-700/30">
+                  <div className="text-xs text-slate-400 mb-1">Precisión</div>
+                  <div className="text-2xl font-bold text-white">{accuracy}%</div>
+                </div>
+              </div>
+
+              {/* Ships Progress */}
+              <div className="p-4 bg-slate-800/40 rounded-lg border border-slate-700/30">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-slate-400">Barcos hundidos</span>
+                  <span className="text-lg font-bold text-cyan-400">{sunk}/{totalShips}</span>
+                </div>
+                <div className="w-full bg-slate-700/50 rounded-full h-2">
+                  <motion.div 
+                    className="bg-linear-to-r from-blue-400 to-cyan-500 h-2 rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${(sunk / totalShips) * 100}%` }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </div>
+              </div>
+
+              {/* Win Message */}
+              <AnimatePresence>
+                {allSunk && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg"
+                  >
+                    <div className="flex items-center gap-2">
+                      <RocketLaunchIcon className="w-6 h-6 text-green-400" />
+                      <div>
+                        <div className="text-lg font-bold text-green-400">¡Ronda completada!</div>
+                        <div className="text-sm text-green-300">+500 puntos</div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Game Over */}
+              <AnimatePresence>
+                {gameOver && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg"
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl">💀</span>
+                      <span className="text-lg font-bold text-red-400">Fin del Juego</span>
+                    </div>
+                    <p className="text-slate-300 text-sm">Puntaje final: {score}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Controls */}
+              <div className="flex gap-2">
+                <button 
+                  onClick={restart} 
+                  className="flex-1 py-3 rounded-lg bg-linear-to-r from-blue-500 to-cyan-600 text-white font-bold hover:from-blue-600 hover:to-cyan-700 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
                 >
+                  <ArrowPathIcon className="w-5 h-5" />
                   Reiniciar
                 </button>
+                <EndGameButton onEnd={() => submitScore(score)} />
               </div>
-            )}
-          </div>
+            </div>
+
+            {/* Instructions Card */}
+            <div className="bg-slate-900/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50">
+              <GameInstructions 
+                title="Cómo Jugar Battleship"
+                description="Coloca tus barcos en el tablero y ataca las coordenadas del oponente para hundir su flota. Cuando aciertes, verás '💥'. Cuando falles, verás '💦'. El primero en hundir todos los barcos del rival gana."
+                controls={[
+                  { key: 'Clic', action: 'Atacar casilla' }
+                ]}
+                note="Usa un patrón de búsqueda sistemático. Cuando aciertes, ataca las casillas adyacentes para hundir el barco completo."
+              />
+            </div>
+          </motion.section>
+
+          {/* RIGHT: Game Board */}
+          <motion.section 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-8 flex items-center justify-center">
+              <div className="bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 rounded-2xl p-4 border-4 border-blue-500/20 shadow-2xl shadow-blue-500/20">
+                <div
+                  style={{ display: "grid", gridTemplateColumns: `repeat(${SIZE}, 42px)`, gap: 4 }}
+                >
+                  {board!.flat().map((cell, i) => {
+                    const r = Math.floor(i / SIZE);
+                    const c = i % SIZE;
+                    const show = cell.hit;
+                    const isShip = cell.ship !== null;
+                    const emoji = show ? (isShip ? "💥" : "💦") : "";
+                    
+                    return (
+                      <motion.button
+                        key={i}
+                        onClick={() => shoot(r, c)}
+                        disabled={gameOver || allSunk || show}
+                        whileHover={!show && !gameOver && !allSunk ? { scale: 1.1 } : {}}
+                        whileTap={!show && !gameOver && !allSunk ? { scale: 0.9 } : {}}
+                        initial={show ? { scale: 0 } : undefined}
+                        animate={show ? { scale: 1 } : undefined}
+                        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                        className="rounded-lg relative overflow-hidden flex items-center justify-center text-2xl font-bold"
+                        style={{
+                          width: 42,
+                          height: 42,
+                          background: show
+                            ? isShip 
+                              ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+                              : 'linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%)'
+                            : 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+                          boxShadow: show
+                            ? isShip
+                              ? '0 0 20px rgba(239, 68, 68, 0.5), inset 0 0 10px rgba(255,255,255,0.2)'
+                              : '0 0 15px rgba(59, 130, 246, 0.3), inset 0 1px 2px rgba(0,0,0,0.3)'
+                            : 'inset 0 1px 2px rgba(0,0,0,0.3)',
+                          cursor: show || gameOver || allSunk ? 'not-allowed' : 'pointer',
+                        }}
+                      >
+                        {emoji}
+                        {!show && !gameOver && !allSunk && (
+                          <div 
+                            className="absolute inset-0 bg-blue-400/0 hover:bg-blue-400/10 transition-colors rounded-lg"
+                          />
+                        )}
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </motion.section>
+
         </div>
+
       </div>
     </main>
   );

@@ -1,10 +1,8 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrophyIcon, FireIcon, SparklesIcon } from '@heroicons/react/24/solid';
-import GameInstructions from '../../components/GameInstructions'
 import { EndGameButton } from '../../components/EndGameButton';
 import { useGameScore } from '../../hooks/useGameScore';
-import { GameScoreDisplay } from '../../components/GameScoreDisplay';
 
 type Cell = string | null;
 const ROWS = 20;
@@ -272,7 +270,9 @@ export default function Tetris() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
+            className="space-y-6"
           >
+            {/* Stats Card */}
             <div className="bg-slate-900/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 space-y-4">
               
               {/* Score Cards */}
@@ -311,18 +311,6 @@ export default function Tetris() {
                 </div>
               </div>
 
-              {/* Game Info */}
-              <div className="p-4 bg-slate-800/40 rounded-lg border border-slate-700/30">
-                <div className="flex items-center gap-2 mb-2">
-                  <SparklesIcon className="w-5 h-5 text-cyan-400" />
-                  <span className="text-sm font-medium text-cyan-300">Objetivo</span>
-                </div>
-                <p className="text-slate-300 text-sm">
-                  Completa líneas horizontales para eliminarlas y ganar puntos. 
-                  Cada línea vale 100 puntos. ¡Evita que las piezas lleguen arriba!
-                </p>
-              </div>
-
               {/* Action Buttons */}
               <div className="flex gap-2">
                 <button 
@@ -349,6 +337,7 @@ export default function Tetris() {
                 </motion.div>
               )}
             </div>
+
           </motion.section>
 
           {/* RIGHT: Game Board */}
@@ -357,33 +346,60 @@ export default function Tetris() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <div className="bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-6 flex items-center justify-center">
+            <div className="bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-8 flex items-center justify-center">
               <div 
-                className="bg-slate-950/60 rounded-xl p-2 border border-slate-800/50"
-                style={{ width: COLS * 28 + 16 }}
+                className="bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 rounded-2xl p-2 border-4 border-cyan-500/20 shadow-2xl shadow-cyan-500/20 overflow-hidden"
               >
                 <div
-                  className="grid gap-1"
+                  className="grid"
                   style={{
                     gridTemplateColumns: `repeat(${COLS}, 28px)`,
+                    gap: '1px',
                   }}
                 >
                   <AnimatePresence>
-                    {drawGrid.flat().map((cell, i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="rounded-md"
-                        style={{
-                          width: 28,
-                          height: 28,
-                          background: cell || "#0b1220",
-                          border: cell ? "2px solid rgba(255,255,255,0.2)" : "1px solid rgba(255,255,255,0.03)",
-                          boxShadow: cell ? `0 0 10px ${cell}40` : 'none'
-                        }}
-                      />
-                    ))}
+                    {drawGrid.flat().map((cell, i) => {
+                      const isEmpty = !cell;
+                      return (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.15 }}
+                          className="rounded relative overflow-hidden"
+                          style={{
+                            width: 28,
+                            height: 28,
+                            background: isEmpty 
+                              ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'
+                              : `linear-gradient(135deg, ${cell} 0%, ${cell}dd 100%)`,
+                            boxShadow: isEmpty 
+                              ? 'inset 0 1px 2px rgba(0,0,0,0.3)' 
+                              : `0 0 15px ${cell}50, inset 0 0 8px rgba(255,255,255,0.2)`,
+                          }}
+                        >
+                          {!isEmpty && (
+                            <>
+                              {/* Brillo superior */}
+                              <div 
+                                className="absolute top-0 left-0 right-0 h-1/2 rounded-t"
+                                style={{
+                                  background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%)'
+                                }}
+                              />
+                              {/* Punto de luz */}
+                              <div 
+                                className="absolute top-0.5 left-0.5 w-1.5 h-1.5 rounded-full"
+                                style={{
+                                  background: 'rgba(255,255,255,0.6)',
+                                  filter: 'blur(0.5px)'
+                                }}
+                              />
+                            </>
+                          )}
+                        </motion.div>
+                      );
+                    })}
                   </AnimatePresence>
                 </div>
               </div>
@@ -392,24 +408,55 @@ export default function Tetris() {
 
         </div>
 
-        {/* BOTTOM ROW: Instructions */}
-        <motion.div
+        {/* Instructions at the Bottom */}
+        <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
+          className="bg-slate-900/40 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50"
         >
-          <GameInstructions 
-            title="Cómo Jugar Tetris"
-            description="Coloca las piezas que caen para formar líneas horizontales completas. Cuando completas una línea, desaparece y ganas puntos. El juego termina si las piezas llegan hasta arriba."
-            controls={[
-              { key: '←', action: 'Mover izquierda' },
-              { key: '→', action: 'Mover derecha' },
-              { key: '↓', action: 'Caída rápida' },
-              { key: '↑', action: 'Rotar pieza' },
-              { key: 'Espacio', action: 'Caída instantánea' }
-            ]}
-            note="Completa múltiples líneas a la vez para obtener más puntos. ¡Evita dejar huecos!"
-          />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Game Info */}
+            <div className="p-4 bg-slate-800/40 rounded-lg border border-slate-700/30">
+              <div className="flex items-center gap-2 mb-2">
+                <SparklesIcon className="w-5 h-5 text-cyan-400" />
+                <span className="text-sm font-medium text-cyan-300">Objetivo</span>
+              </div>
+              <p className="text-slate-300 text-sm">
+                Completa líneas horizontales para eliminarlas y ganar puntos. 
+                Cada línea vale 100 puntos. ¡Evita que las piezas lleguen arriba!
+              </p>
+            </div>
+
+            {/* Controls */}
+            <div className="p-4 bg-slate-800/40 rounded-lg border border-slate-700/30">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-sm font-medium text-cyan-300">Controles</span>
+              </div>
+              <div className="flex flex-wrap gap-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <kbd className="px-2 py-1 bg-slate-700 rounded text-xs">←</kbd>
+                  <span className="text-slate-400 text-xs">Izquierda</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <kbd className="px-2 py-1 bg-slate-700 rounded text-xs">→</kbd>
+                  <span className="text-slate-400 text-xs">Derecha</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <kbd className="px-2 py-1 bg-slate-700 rounded text-xs">↓</kbd>
+                  <span className="text-slate-400 text-xs">Caída rápida</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <kbd className="px-2 py-1 bg-slate-700 rounded text-xs">↑</kbd>
+                  <span className="text-slate-400 text-xs">Rotar</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <kbd className="px-2 py-1 bg-slate-700 rounded text-xs">Espacio</kbd>
+                  <span className="text-slate-400 text-xs">Caída instantánea</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </motion.div>
 
       </div>
