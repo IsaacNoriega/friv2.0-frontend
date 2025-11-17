@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrophyIcon, FireIcon, CursorArrowRaysIcon, BoltIcon, ShoppingCartIcon, ArrowPathIcon } from '@heroicons/react/24/solid';
+import { TrophyIcon, FireIcon, CursorArrowRaysIcon, BoltIcon, ShoppingCartIcon, ArrowPathIcon, SpeakerWaveIcon, SpeakerXMarkIcon } from '@heroicons/react/24/solid';
 import GameInstructions from '../../components/GameInstructions';
 import { EndGameButton } from '../../components/EndGameButton';
 import { useGameScore } from '../../hooks/useGameScore';
+import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
 
 type Upgrade = {
   id: string;
@@ -24,6 +25,7 @@ export default function Clicker() {
   const [clickAnimation, setClickAnimation] = useState(false);
   const [particles, setParticles] = useState<Array<{id: number, x: number, y: number}>>([]);
   const { submitScore, error: scoreError} = useGameScore('clicker');
+  const { isMuted, toggleMute } = useBackgroundMusic();
 
   // Guardar puntuación máxima
   useEffect(() => {
@@ -141,11 +143,24 @@ export default function Clicker() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center gap-3 mb-2">
-            <div className="text-5xl">💥</div>
-            <h1 className="text-5xl font-black bg-linear-to-r from-cyan-400 via-pink-300 to-cyan-500 bg-clip-text text-transparent">
-              Clicker Game
-            </h1>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <div className="text-5xl">💥</div>
+              <h1 className="text-5xl font-black bg-linear-to-r from-cyan-400 via-pink-300 to-cyan-500 bg-clip-text text-transparent">
+                Clicker Game
+              </h1>
+            </div>
+            <button
+              onClick={toggleMute}
+              className="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 transition-colors border border-slate-700/50"
+              title={isMuted ? "Activar música" : "Silenciar música"}
+            >
+              {isMuted ? (
+                <SpeakerXMarkIcon className="w-6 h-6 text-slate-400" />
+              ) : (
+                <SpeakerWaveIcon className="w-6 h-6 text-cyan-400" />
+              )}
+            </button>
           </div>
           <p className="text-slate-400 text-lg ml-16">Haz clic para ganar puntos y compra mejoras</p>
         </motion.header>

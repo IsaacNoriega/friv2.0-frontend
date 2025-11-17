@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrophyIcon, FireIcon, PlayIcon, ArrowPathIcon, MusicalNoteIcon } from '@heroicons/react/24/solid';
+import { TrophyIcon, FireIcon, PlayIcon, ArrowPathIcon, MusicalNoteIcon, SpeakerWaveIcon, SpeakerXMarkIcon } from '@heroicons/react/24/solid';
 import GameInstructions from '../../components/GameInstructions'
 import { EndGameButton } from '../../components/EndGameButton';
 import { useGameScore } from '../../hooks/useGameScore';
+import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
 
 const COLORS = ['green', 'red', 'yellow', 'blue'] as const
 
@@ -23,6 +24,7 @@ export default function SimonDice() {
   const timeoutRef = useRef<number | null>(null)
   const bestRef = useRef<number>(Number(localStorage.getItem('simon-best') || '0'))
   const { submitScore } = useGameScore('simon')
+  const { isMuted, toggleMute } = useBackgroundMusic();
 
   useEffect(() => {
     return () => {
@@ -109,11 +111,24 @@ export default function SimonDice() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center gap-3 mb-2">
-            <div className="text-5xl">🎵</div>
-            <h1 className="text-5xl font-black bg-linear-to-r from-green-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Simón Dice
-            </h1>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <div className="text-5xl">🎵</div>
+              <h1 className="text-5xl font-black bg-linear-to-r from-green-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+                Simón Dice
+              </h1>
+            </div>
+            <button
+              onClick={toggleMute}
+              className="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 transition-colors border border-slate-700/50"
+              title={isMuted ? "Activar música" : "Silenciar música"}
+            >
+              {isMuted ? (
+                <SpeakerXMarkIcon className="w-6 h-6 text-slate-400" />
+              ) : (
+                <SpeakerWaveIcon className="w-6 h-6 text-green-400" />
+              )}
+            </button>
           </div>
           <p className="text-slate-400 text-lg ml-16">Memoriza y repite la secuencia de colores</p>
         </motion.header>

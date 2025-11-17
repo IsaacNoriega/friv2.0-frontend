@@ -3,7 +3,8 @@ import GameInstructions from "../../components/GameInstructions";
 import { EndGameButton } from "../../components/EndGameButton";
 import { useGameScore } from "../../hooks/useGameScore";
 import { motion, AnimatePresence } from "framer-motion";
-import { TrophyIcon, FireIcon, FlagIcon, ClockIcon } from '@heroicons/react/24/solid';
+import { TrophyIcon, FireIcon, FlagIcon, ClockIcon, SpeakerWaveIcon, SpeakerXMarkIcon } from '@heroicons/react/24/solid';
+import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
 
 type Cell = {
   mine: boolean;
@@ -181,6 +182,7 @@ export default function MinesweeperRondas() {
   const [score, setScore] = useState(0);
   const [started, setStarted] = useState(false);
   const { submitScore, error: scoreError, bestScore } = useGameScore("minesweeper");
+  const { isMuted, toggleMute } = useBackgroundMusic();
 
   const [rows, cols, mines] = (() => {
     const base = 6 + round;
@@ -395,13 +397,26 @@ export default function MinesweeperRondas() {
     <main className="min-h-screen bg-linear-to-br from-[#050d1a] via-[#071123] to-[#0a1628] text-white p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <motion.h1
-          className="text-4xl md:text-5xl font-black text-center mb-8 bg-linear-to-r from-violet-400 to-purple-300 bg-clip-text text-transparent"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          💣 Buscaminas
-        </motion.h1>
+        <div className="flex items-center justify-between mb-8">
+          <motion.h1
+            className="text-4xl md:text-5xl font-black bg-linear-to-r from-violet-400 to-purple-300 bg-clip-text text-transparent"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            💣 Buscaminas
+          </motion.h1>
+          <button
+            onClick={toggleMute}
+            className="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 transition-colors border border-slate-700/50"
+            title={isMuted ? "Activar música" : "Silenciar música"}
+          >
+            {isMuted ? (
+              <SpeakerXMarkIcon className="w-6 h-6 text-slate-400" />
+            ) : (
+              <SpeakerWaveIcon className="w-6 h-6 text-violet-400" />
+            )}
+          </button>
+        </div>
 
         {/* Main Game Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">

@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrophyIcon, FireIcon, SparklesIcon } from '@heroicons/react/24/solid';
+import { TrophyIcon, FireIcon, SparklesIcon, SpeakerWaveIcon, SpeakerXMarkIcon } from '@heroicons/react/24/solid';
 import GameInstructions from '../../components/GameInstructions';
 import { EndGameButton } from '../../components/EndGameButton';
 import { useGameScore } from '../../hooks/useGameScore';
+import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
 
 type Card = {
   code: string; 
@@ -54,6 +55,7 @@ export default function Blackjack() {
   const [round,setRound] = useState<number>(1);
 
   const { submitScore, error: bestScore } = useGameScore('blackjack');
+  const { isMuted, toggleMute } = useBackgroundMusic();
 
   const newGame = useCallback(()=>{
     const d = shuffle(buildDeck());
@@ -109,11 +111,24 @@ export default function Blackjack() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center gap-3 mb-2">
-            <div className="text-5xl">🃏</div>
-            <h1 className="text-5xl font-black bg-linear-to-r from-emerald-400 via-green-300 to-emerald-500 bg-clip-text text-transparent">
-              Blackjack
-            </h1>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <div className="text-5xl">🃏</div>
+              <h1 className="text-5xl font-black bg-linear-to-r from-emerald-400 via-green-300 to-emerald-500 bg-clip-text text-transparent">
+                Blackjack
+              </h1>
+            </div>
+            <button
+              onClick={toggleMute}
+              className="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 transition-colors border border-slate-700/50"
+              title={isMuted ? "Activar música" : "Silenciar música"}
+            >
+              {isMuted ? (
+                <SpeakerXMarkIcon className="w-6 h-6 text-slate-400" />
+              ) : (
+                <SpeakerWaveIcon className="w-6 h-6 text-emerald-400" />
+              )}
+            </button>
           </div>
           <p className="text-slate-400 text-lg ml-16">Alcanza 21 sin pasarte y vence al dealer</p>
         </motion.header>

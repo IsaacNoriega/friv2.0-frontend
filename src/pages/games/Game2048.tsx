@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrophyIcon, FireIcon, SparklesIcon } from '@heroicons/react/24/solid';
+import { TrophyIcon, FireIcon, SparklesIcon, SpeakerWaveIcon, SpeakerXMarkIcon } from '@heroicons/react/24/solid';
 import GameInstructions from '../../components/GameInstructions';
 import { EndGameButton } from '../../components/EndGameButton';
 import { useGameScore } from '../../hooks/useGameScore';
+import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
 
 type Tile = number | null;
 const SIZE = 4;
@@ -79,6 +80,7 @@ export default function Game2048() {
   );
   const [over, setOver] = useState(false);
   const { submitScore } = useGameScore('2048');
+  const { isMuted, toggleMute } = useBackgroundMusic();
   const [lastMoveDir, setLastMoveDir] = useState<string | null>(null);
   const [renderVersion, setRenderVersion] = useState(0);
   const [mergedIndices, setMergedIndices] = useState<Set<number>>(new Set());
@@ -234,11 +236,24 @@ export default function Game2048() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center gap-3 mb-2">
-            <div className="text-5xl">🎯</div>
-            <h1 className="text-5xl font-black bg-linear-to-r from-amber-400 via-orange-300 to-amber-500 bg-clip-text text-transparent">
-              2048
-            </h1>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <div className="text-5xl">🎯</div>
+              <h1 className="text-5xl font-black bg-linear-to-r from-amber-400 via-orange-300 to-amber-500 bg-clip-text text-transparent">
+                2048
+              </h1>
+            </div>
+            <button
+              onClick={toggleMute}
+              className="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 transition-colors border border-slate-700/50"
+              title={isMuted ? "Activar música" : "Silenciar música"}
+            >
+              {isMuted ? (
+                <SpeakerXMarkIcon className="w-6 h-6 text-slate-400" />
+              ) : (
+                <SpeakerWaveIcon className="w-6 h-6 text-amber-400" />
+              )}
+            </button>
           </div>
           <p className="text-slate-400 text-lg ml-16">Combina fichas hasta llegar al 2048</p>
         </motion.header>
