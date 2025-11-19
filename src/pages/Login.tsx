@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, User } from 'lucide-react';
 import { api } from '../services/api';
@@ -7,20 +7,45 @@ import { auth } from '../utils/auth';
 
 export const LoginComponent: React.FC<{ onGuest?: (u: unknown) => void }> = ({ onGuest }) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
 
-  // Limpiar storage anterior y verificar login
-  React.useEffect(() => {
+  // Procesar token de Google si existe
+  useEffect(() => {
+    const googleToken = searchParams.get('googleToken');
+    
+    if (googleToken) {
+      console.log('🔵 Token de Google detectado en URL');
+      
+      // Guardar token y obtener datos del usuario
+      auth.setToken(googleToken);
+      
+      api.getMe()
+        .then((userResponse) => {
+          console.log('✅ Usuario autenticado:', userResponse);
+          auth.setUser(userResponse);
+          navigate('/dashboard', { replace: true });
+        })
+        .catch((error) => {
+          console.error('❌ Error obteniendo datos del usuario:', error);
+          auth.logout();
+          setError('Error al procesar la autenticación de Google');
+        });
+      
+      return;
+    }
+
+    // Limpiar storage anterior
     const token = localStorage.getItem('token');
     if (token) {
-      auth.logout(); // Limpiar cualquier sesión anterior
-      window.location.reload(); // Recargar para limpiar el estado
+      auth.logout();
+      window.location.reload();
     }
-  }, []);
+  }, [navigate, searchParams]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-950 via-violet-950 to-fuchsia-950 p-4">
