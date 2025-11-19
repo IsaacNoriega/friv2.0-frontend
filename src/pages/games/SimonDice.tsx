@@ -22,7 +22,7 @@ export default function SimonDice() {
   const [score, setScore] = useState(0)
   const [started, setStarted] = useState(false)
   const timeoutRef = useRef<number | null>(null)
-  const { submitScore, bestScore } = useGameScore('simon')
+  const { submitScore, bestScore } = useGameScore('simondice')
   const { isMuted, toggleMute } = useBackgroundMusic();
 
   useEffect(() => {
