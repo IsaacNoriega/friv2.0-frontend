@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'https://friv2-backend.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL || 'https://friv2-0-backend.onrender.com';
 
 interface LoginData {
   email: string;
