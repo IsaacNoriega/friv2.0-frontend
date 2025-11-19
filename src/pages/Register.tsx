@@ -7,8 +7,6 @@ import { api } from '../services/api';
 export const RegisterComponent: React.FC = () => {
   const navigate = useNavigate();
   const [error, setError] = useState('');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -44,15 +42,12 @@ export const RegisterComponent: React.FC = () => {
 
             <form onSubmit={async (e) => {
                 e.preventDefault();
-                setLoading(true);
                 setError('');
                 try {
                   await api.register(formData);
                   navigate('/login');
                 } catch (err) {
                   setError(err instanceof Error ? err.message : 'Error en el registro');
-                } finally {
-                  setLoading(false);
                 }
               }} className="flex flex-col gap-5">
               {error && (

@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { LoginComponent } from "./pages/Login";
 import { RegisterComponent } from "./pages/Register";
@@ -43,7 +42,7 @@ function Layout() {
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar current={current as any} onNavigate={onNavigate as any} />
+      <Sidebar current={current as "login" | "register" | "dashboard" | "ranking" | "score" | "profile" | "guest"} onNavigate={onNavigate as (v: "login" | "register" | "dashboard" | "ranking" | "score" | "profile" | "guest") => void} />
       <div className="flex-1 bg-[#071123]">
         {/* Mobile top nav (visible on small screens) */}
         <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-[#071123] border-b border-slate-800 flex items-center gap-2 p-2 px-4">
@@ -66,14 +65,12 @@ function Layout() {
 }
 
 function App() {
-  const [user, setUser] = useState<any>(null);
-
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Navigate to="/login" />} />
 
-        <Route path="/login" element={<LoginComponent onGuest={(u) => setUser(u)} />} />
+        <Route path="/login" element={<LoginComponent />} />
         <Route path="/register" element={<RegisterComponent />} />
         <Route path="/auth/callback" element={<GoogleCallback />} />
 
@@ -96,7 +93,7 @@ function App() {
           <Route path="/sudoku" element={<Sudoku />} />
           <Route path="/simondice" element={<SimonDice />} />
           <Route path="/clicker" element={<Clicker />} />
-          <Route path="/profile" element={<Profile user={user} onSave={(u)=>{ console.log('profile save', u); }} />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
 
         <Route path="*" element={<h2 className="text-center text-white mt-10">404 - Página no encontrada</h2>} />

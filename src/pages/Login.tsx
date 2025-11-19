@@ -8,8 +8,6 @@ import { auth } from '../utils/auth';
 export const LoginComponent: React.FC<{ onGuest?: (u: unknown) => void }> = ({ onGuest }) => {
   const navigate = useNavigate();
   const [error, setError] = useState('');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -45,7 +43,6 @@ export const LoginComponent: React.FC<{ onGuest?: (u: unknown) => void }> = ({ o
 
             <form onSubmit={async (e) => {
                 e.preventDefault();
-                setLoading(true);
                 setError('');
                 try {
                   const response = await api.login(formData);
@@ -55,8 +52,6 @@ export const LoginComponent: React.FC<{ onGuest?: (u: unknown) => void }> = ({ o
                   }
                 } catch (err) {
                   setError(err instanceof Error ? err.message : 'Error en el inicio de sesión');
-                } finally {
-                  setLoading(false);
                 }
               }} className="flex flex-col gap-5">
               {error && (
