@@ -62,10 +62,9 @@ export default function SimonDice() {
     if (idx !== sequence[playerIndex]) {
       setMessage('❌ Incorrecto, juego terminado.')
       setStarted(false)
-      // Guardar el score actual (sin bonus por esta ronda porque falló)
-      const finalScore = score;
-      if (bestScore === null || finalScore > bestScore) {
-        submitScore(finalScore).catch(() => {})
+      // Guardar el score cuando falla
+      if (score > 0) {
+        submitScore(score).catch(console.error);
       }
       return
     }
@@ -90,6 +89,10 @@ export default function SimonDice() {
   }
 
   function reset() {
+    // Guardar el score antes de resetear
+    if (score > 0 && started) {
+      submitScore(score).catch(console.error);
+    }
     setSequence([])
     setPlayerIndex(0)
     setPlaying(false)
@@ -223,8 +226,8 @@ export default function SimonDice() {
 
               {/* Action Button */}
               <EndGameButton onEnd={() => {
-                if (bestScore === null || score > bestScore) {
-                  submitScore(score);
+                if (score > 0) {
+                  submitScore(score).catch(console.error);
                 }
               }} />
             </div>
