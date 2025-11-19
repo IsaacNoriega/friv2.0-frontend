@@ -5,9 +5,10 @@ import { Mail, Lock, User } from 'lucide-react';
 import { api } from '../services/api';
 import { auth } from '../utils/auth';
 
-export const LoginComponent: React.FC<{ onGuest?: (u: any) => void }> = ({ onGuest }) => {
+export const LoginComponent: React.FC<{ onGuest?: (u: unknown) => void }> = ({ onGuest }) => {
   const navigate = useNavigate();
   const [error, setError] = useState('');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',

@@ -26,7 +26,7 @@ export default function Ranking(){
   const [top, setTop] = useState<Entry[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [me, setMe] = useState<Record<string, any> | null>(null)
+  const [me, setMe] = useState<Record<string, unknown> | null>(null)
 
   useEffect(() => {
     let mounted = true
@@ -37,12 +37,19 @@ export default function Ranking(){
         try { const m = await api.getMe(); if (mounted) setMe(m) } catch { if (mounted) setMe(null) }
         const data = await api.getGameTop(selectedGame, 50) as unknown
         // data may be an array or object - api.getGameTop normalizes to array
-        const arr = Array.isArray(data) ? data as any[] : []
+        type ApiTopEntry = {
+          username?: string
+          score: number
+          user_id?: string
+          user?: { username?: string; name?: string; _id?: string; id?: string }
+        }
+        const arr = Array.isArray(data) ? data as ApiTopEntry[] : []
         if (!mounted) return
         setTop(arr.map((x) => ({ username: x.username ?? x.user?.username ?? x.user?.name, score: x.score, user_id: x.user_id ?? x.user?._id ?? x.user?.id })))
-      } catch (e: any) {
+      } catch (e: unknown) {
         if (!mounted) return
-        setError(e?.message || 'Error cargando leaderboard')
+        const errMsg = e instanceof Error ? e.message : (typeof e === 'string' ? e : 'Error cargando leaderboard')
+        setError(errMsg)
       } finally { if (mounted) setLoading(false) }
     }
     load()

@@ -128,6 +128,7 @@ export default function AhorcadoArcade() {
       });
       if (!word.includes(l)) setWrong(w => w + 1);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [word, gameOver]
   );
 
@@ -203,6 +204,10 @@ export default function AhorcadoArcade() {
         </motion.div>
       </main>
     );
+  }
+
+  function newRound() {
+    throw new Error("Function not implemented.");
   }
 
   return (

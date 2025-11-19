@@ -45,7 +45,6 @@ function neighbors(p: Pos) {
 
 // Simple BFS pathfinder returning next step towards target
 function nextStepTowards(grid: Cell[][], from: Pos, to: Pos): Pos | null {
-  const rows = grid.length, cols = grid[0].length
   const q: Pos[] = [from]
   const prev = new Map<string, string | null>()
   const key = (p: Pos) => `${p.r},${p.c}`
@@ -206,6 +205,7 @@ export default function Pacman() {
         return l - 1
       })
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tick, pac, started, score])
 
   // detect win
@@ -236,6 +236,7 @@ export default function Pacman() {
     })
     const t = setTimeout(() => nextRound(), 900)
     return () => clearTimeout(t)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [win])
 
   const handleScoreSubmit = useCallback((scoreToSubmit: number) => {

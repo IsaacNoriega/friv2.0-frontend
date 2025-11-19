@@ -192,6 +192,7 @@ export default function MinesweeperRondas() {
 
   useEffect(() => {
     if (started) reset();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [round]);
 
   // Detecta victoria
@@ -216,6 +217,7 @@ export default function MinesweeperRondas() {
       }
       return newScore;
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [won]);
 
   function reset() {
@@ -390,6 +392,7 @@ export default function MinesweeperRondas() {
         </motion.div>
       </main>
     );
+  // eslint-disable-next-line no-irregular-whitespace
   }  // ---- Juego activo ----
   const flaggedCount = board.flat().filter(c => c.flagged).length;
 

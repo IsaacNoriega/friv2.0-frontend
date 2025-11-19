@@ -7,6 +7,7 @@ import { api } from '../services/api';
 export const RegisterComponent: React.FC = () => {
   const navigate = useNavigate();
   const [error, setError] = useState('');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     username: '',

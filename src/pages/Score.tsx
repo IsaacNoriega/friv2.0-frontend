@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeftIcon, ArrowRightIcon, TrophyIcon, FireIcon } from '@heroicons/react/24/solid'
 import { api } from '../services/api'

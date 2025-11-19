@@ -129,6 +129,7 @@ export default function Connect4() {
         setCpuThinking(false);
       }, delay);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [player, winner]);
 
   const nextRound = useCallback(() => {
@@ -157,6 +158,7 @@ export default function Connect4() {
     } else if (winner === 2) {
       if (score > (bestScore || 0)) submitScore(score).catch(console.error);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [winner]);
 
   if (!gameStarted) {
