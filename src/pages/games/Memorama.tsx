@@ -108,10 +108,10 @@ export default function MemoramaPorRondas() {
 
   // Guardar puntuación cuando termina la ronda
   useEffect(() => {
-    if (roundFinished && score > 0) {
+    if (roundFinished && score > 0 && (bestScore === null || score > bestScore)) {
       submitScore(score).catch(console.error);
     }
-  }, [roundFinished, score, submitScore]);
+  }, [roundFinished, score, submitScore, bestScore]);
 
   // Clic en carta
   function onCardClick(index: number) {
@@ -122,7 +122,7 @@ export default function MemoramaPorRondas() {
   }
 
   const cols = useMemo(
-    () => ({ gridTemplateColumns: "repeat(4, minmax(0,1fr))" }),
+    () => ({ gridTemplateColumns: "repeat(4, minmax(120px, 1fr))" }),
     []
   );
 
@@ -273,7 +273,11 @@ export default function MemoramaPorRondas() {
                 </div>
               </div>
 
-              <EndGameButton onEnd={() => submitScore(score)} />
+              <EndGameButton onEnd={() => {
+                if (bestScore === null || score > bestScore) {
+                  submitScore(score);
+                }
+              }} />
             </div>
           </motion.section>
 
@@ -283,8 +287,8 @@ export default function MemoramaPorRondas() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <div className="bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-6 h-full flex items-center justify-center">
-              <div className="grid gap-3" style={cols as React.CSSProperties}>
+            <div className="bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-8 h-full flex items-center justify-center">
+              <div className="grid gap-4" style={cols as React.CSSProperties}>
                 <AnimatePresence>
                   {cards.map((c, i) => {
                     const isFlipped = flipped.includes(i) || c.matched;
@@ -297,7 +301,7 @@ export default function MemoramaPorRondas() {
                         transition={{ delay: i * 0.02 }}
                         whileHover={{ scale: isFlipped ? 1 : 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className={`h-24 rounded-xl flex items-center justify-center text-4xl transition-all duration-300 ${
+                        className={`h-32 w-full rounded-xl flex items-center justify-center text-5xl transition-all duration-300 ${
                           isFlipped
                             ? "bg-linear-to-br from-purple-500/20 to-pink-500/10 border-2 border-purple-500/50 shadow-lg shadow-purple-500/20"
                             : "bg-slate-800/60 border-2 border-slate-700/50 hover:border-purple-500/30"

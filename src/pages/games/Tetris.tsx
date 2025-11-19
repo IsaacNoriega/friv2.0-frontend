@@ -120,11 +120,14 @@ export default function Tetris() {
     const newPiece = { shape, r, c, type: t, rot, color: COLORS[t] };
     if (!canPlace(newPiece, grid)) {
       setGameOver(true);
-      submitScore(currentScore);
+      // Solo guardar si es primera vez o supera el mejor puntaje
+      if (bestScore === null || currentScore > bestScore) {
+        submitScore(currentScore);
+      }
       return;
     }
     pieceRef.current = newPiece;
-  }, [grid, canPlace, currentScore, submitScore]);
+  }, [grid, canPlace, currentScore, submitScore, bestScore]);
 
   // 🔹 Fija la pieza al grid
   const lockPiece = useCallback(() => {
@@ -348,7 +351,13 @@ export default function Tetris() {
                     <span className="text-2xl">💀</span>
                     <span className="text-lg font-bold text-red-400">Game Over</span>
                   </div>
-                  <p className="text-slate-300 text-sm">Las piezas llegaron hasta arriba</p>
+                  <p className="text-slate-300 text-sm mb-4">Las piezas llegaron hasta arriba</p>
+                  <button
+                    onClick={restart}
+                    className="w-full py-2 rounded-lg bg-linear-to-r from-cyan-500 to-blue-600 text-white font-bold hover:from-cyan-600 hover:to-blue-700 transition-all shadow-lg shadow-cyan-500/20"
+                  >
+                    🔄 Jugar de Nuevo
+                  </button>
                 </motion.div>
               )}
             </div>

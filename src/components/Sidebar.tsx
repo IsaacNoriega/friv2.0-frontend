@@ -45,16 +45,10 @@ export default function Sidebar({ current, onNavigate }: { current: View; onNavi
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-4 pb-6 border-b border-slate-700/50 mb-6"
+        className="flex items-center justify-center pb-6 border-b border-slate-700/50 mb-6"
       >
-        <div className="w-12 h-12 rounded-xl bg-linear-to-br from-sky-400 via-purple-500 to-pink-500 flex items-center justify-center text-2xl shadow-lg shadow-purple-500/30">
-          🎮
-        </div>
-        <div>
-          <div className="text-xl font-bold bg-linear-to-r from-sky-400 to-purple-400 bg-clip-text text-transparent">
-            Friv 2.0
-          </div>
-          <div className="text-xs text-slate-500">Game Platform</div>
+        <div className="w-24 h-24 rounded-xl flex items-center justify-center shadow-lg">
+          <img src="/logo/logo.png" alt="FRIV 2.0" className="w-full h-full object-contain" />
         </div>
       </motion.div>
 

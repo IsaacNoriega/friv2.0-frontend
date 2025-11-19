@@ -173,7 +173,8 @@ export default function AhorcadoArcade() {
   useEffect(() => {
     if (lost && !gameOver) {
       setGameOver(true);
-      if (score > (bestScore || 0)) {
+      // Solo guardar si es primera vez o supera el mejor puntaje
+      if (bestScore === null || score > bestScore) {
         submitScore(score).catch(console.error);
       }
     }
@@ -309,7 +310,11 @@ export default function AhorcadoArcade() {
                     🔄 Reiniciar
                   </button>
                 )}
-                <EndGameButton onEnd={() => submitScore(score)} />
+                <EndGameButton onEnd={() => {
+                  if (bestScore === null || score > bestScore) {
+                    submitScore(score);
+                  }
+                }} />
               </div>
 
               {/* Status Messages */}
@@ -337,7 +342,13 @@ export default function AhorcadoArcade() {
                       <span className="text-2xl">💀</span>
                       <span className="text-lg font-bold text-red-400">Fin del Juego</span>
                     </div>
-                    <p className="text-slate-300 text-sm">Puntaje final: {score}</p>
+                    <p className="text-slate-300 text-sm mb-4">Puntaje final: {score}</p>
+                    <button
+                      onClick={() => { newRound(); setScore(0); setRound(1); }}
+                      className="w-full py-2 rounded-lg bg-linear-to-r from-rose-500 to-orange-600 text-white font-bold hover:from-rose-600 hover:to-orange-700 transition-all shadow-lg shadow-rose-500/20"
+                    >
+                      🔄 Jugar de Nuevo
+                    </button>
                   </motion.div>
                 )}
               </AnimatePresence>

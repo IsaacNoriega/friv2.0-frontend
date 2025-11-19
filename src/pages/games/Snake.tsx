@@ -98,7 +98,9 @@ export default function Snake() {
 
         if (prev.some(p => p.x === nx && p.y === ny)) {
           setRunning(false)
-          submitScore(score).catch(console.error)
+          if (serverBestScore === null || score > serverBestScore) {
+            submitScore(score).catch(console.error)
+          }
           return prev
         }
 
@@ -204,7 +206,11 @@ export default function Snake() {
               </button>
 
               {/* Action Button */}
-              <EndGameButton onEnd={() => submitScore(score)} />
+              <EndGameButton onEnd={() => {
+                if (serverBestScore === null || score > serverBestScore) {
+                  submitScore(score);
+                }
+              }} />
             </div>
           </motion.section>
 

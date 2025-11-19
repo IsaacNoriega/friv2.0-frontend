@@ -17,40 +17,35 @@ type Upgrade = {
 
 export default function Clicker() {
   const [score, setScore] = useState(0);
-  const [maxScore, setMaxScore] = useState(0);
   const [pointsPerClick, setPointsPerClick] = useState(1);
   const [autoClickers, setAutoClickers] = useState(0);
   const [upgrades, setUpgrades] = useState<Upgrade[]>([]);
   const [gameStarted, setGameStarted] = useState(false); // pre-pantalla
   const [clickAnimation, setClickAnimation] = useState(false);
   const [particles, setParticles] = useState<Array<{id: number, x: number, y: number}>>([]);
-  const { submitScore, error: scoreError} = useGameScore('clicker');
+  const { submitScore, bestScore } = useGameScore('clicker');
   const { isMuted, toggleMute } = useBackgroundMusic();
 
   // Guardar puntuación máxima
   useEffect(() => {
-    if (score > maxScore) {
-      setMaxScore(score);
+    if (bestScore === null || score > bestScore) {
       submitScore(score).catch(console.error);
     }
-  }, [score, maxScore, submitScore]);
+  }, [score, bestScore, submitScore]);
 
   // Cargar progreso
   useEffect(() => {
-    const savedScore = localStorage.getItem("score");
     const savedPPC = localStorage.getItem("ppc");
     const savedAuto = localStorage.getItem("auto");
-    if (savedScore) setScore(parseInt(savedScore));
     if (savedPPC) setPointsPerClick(parseInt(savedPPC));
     if (savedAuto) setAutoClickers(parseInt(savedAuto));
   }, []);
 
   // Guardar progreso
   useEffect(() => {
-    localStorage.setItem("score", score.toString());
     localStorage.setItem("ppc", pointsPerClick.toString());
     localStorage.setItem("auto", autoClickers.toString());
-  }, [score, pointsPerClick, autoClickers]);
+  }, [pointsPerClick, autoClickers]);
 
   // Auto-click
   useEffect(() => {
@@ -100,7 +95,6 @@ export default function Clicker() {
     if (window.confirm("¿Reiniciar el progreso?")) {
       localStorage.clear();
       setScore(0);
-      setMaxScore(0);
       setPointsPerClick(1);
       setAutoClickers(0);
       setUpgrades((prev) => prev.map((u) => ({ ...u, purchased: false })));
@@ -193,7 +187,7 @@ export default function Clicker() {
                   <TrophyIcon className="w-5 h-5 text-pink-400" />
                 </div>
                 <div className="text-4xl font-black text-pink-300">
-                  {maxScore.toLocaleString()}
+                  {(bestScore || 0).toLocaleString()}
                 </div>
               </div>
 
@@ -214,12 +208,6 @@ export default function Clicker() {
                   <div className="text-2xl font-bold text-pink-300">{autoClickers}</div>
                 </div>
               </div>
-
-              {scoreError && (
-                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-                  <p className="text-red-400 text-sm">{scoreError}</p>
-                </div>
-              )}
 
               {/* Click Button */}
               <div className="relative py-8">
@@ -276,7 +264,11 @@ export default function Clicker() {
               </div>
 
               {/* Action Button */}
-              <EndGameButton onEnd={() => submitScore(score)} />
+              <EndGameButton onEnd={() => {
+                if (bestScore === null || score > bestScore) {
+                  submitScore(score);
+                }
+              }} />
             </div>
           </motion.section>
 

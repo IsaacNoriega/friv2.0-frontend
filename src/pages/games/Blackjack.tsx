@@ -54,7 +54,7 @@ export default function Blackjack() {
   const [score,setScore] = useState<number>(0);
   const [round,setRound] = useState<number>(1);
 
-  const { submitScore, error: bestScore } = useGameScore('blackjack');
+  const { submitScore, bestScore } = useGameScore('blackjack');
   const { isMuted, toggleMute } = useBackgroundMusic();
 
   const newGame = useCallback(()=>{
@@ -73,17 +73,29 @@ export default function Blackjack() {
   const dealerValue = useMemo(()=>handValue(dealer),[dealer]);
 
   useEffect(()=>{
+    if(gameOver) return; // Evitar ejecución si ya terminó el juego
+    
     if(playerValue===21 && player.length===2){
       setMessage("¡Blackjack! +100 pts");
-      setScore(s=>s+100);
+      setScore(s=>{
+        const newScore = s + 100;
+        if (bestScore === null || newScore > bestScore) {
+          submitScore(newScore).catch(console.error);
+        }
+        return newScore;
+      });
       setGameOver(true);
-      submitScore(score+100).catch(console.error);
     } else if(playerValue>21){
       setMessage("Te pasaste. Fin del juego.");
       setGameOver(true);
-      submitScore(score).catch(console.error);
+      setScore(s => {
+        if (bestScore === null || s > bestScore) {
+          submitScore(s).catch(console.error);
+        }
+        return s;
+      });
     }
-  },[playerValue,player.length,score,submitScore]);
+  },[playerValue,player.length,submitScore,bestScore,gameOver]);
 
   function playerHit(){ if(gameOver || deck.length===0) return; const [c,...rest]=deck; setPlayer(p=>[...p,c]); setDeck(rest); }
 
@@ -92,10 +104,40 @@ export default function Blackjack() {
     while(handValue(dh)<17){ const [c,...rest]=d; dh=[...dh,c]; d=rest; }
     const pv = handValue(player); const dv = handValue(dh);
     setDealer(dh); setDeck(d);
-    if(dv>21){ setMessage("Dealer se pasó. +100 pts"); setScore(s=>s+100); setGameOver(true); submitScore(score+100).catch(console.error);}
-    else if(pv>dv){ setMessage("¡Ganaste! +100 pts"); setScore(s=>s+100); setGameOver(true); submitScore(score+100).catch(console.error);}
-    else if(pv===dv){ setMessage("Empate +50 pts"); setScore(s=>s+50); setGameOver(true); submitScore(score+50).catch(console.error);}
-    else { setMessage("Perdiste. Fin del juego."); setGameOver(true); submitScore(score).catch(console.error);}
+    if(dv>21){ 
+      setMessage("Dealer se pasó. +100 pts"); 
+      const newScore = score + 100;
+      setScore(s=>s+100); 
+      setGameOver(true); 
+      if (bestScore === null || newScore > bestScore) {
+        submitScore(newScore).catch(console.error);
+      }
+    }
+    else if(pv>dv){ 
+      setMessage("¡Ganaste! +100 pts"); 
+      const newScore = score + 100;
+      setScore(s=>s+100); 
+      setGameOver(true); 
+      if (bestScore === null || newScore > bestScore) {
+        submitScore(newScore).catch(console.error);
+      }
+    }
+    else if(pv===dv){ 
+      setMessage("Empate +50 pts"); 
+      const newScore = score + 50;
+      setScore(s=>s+50); 
+      setGameOver(true); 
+      if (bestScore === null || newScore > bestScore) {
+        submitScore(newScore).catch(console.error);
+      }
+    }
+    else { 
+      setMessage("Perdiste. Fin del juego."); 
+      setGameOver(true); 
+      if (bestScore === null || score > bestScore) {
+        submitScore(score).catch(console.error);
+      }
+    }
   }
 
   function playerStand(){ if(gameOver) return; dealerPlayAndResolve(); }
@@ -234,9 +276,24 @@ export default function Blackjack() {
                     ▶ Siguiente Ronda
                   </motion.button>
                 )}
+
+                {gameOver && message.includes("Fin del juego") && (
+                  <motion.button 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    onClick={() => { setScore(0); setRound(1); newGame(); }}
+                    className="w-full py-3 rounded-lg bg-linear-to-r from-emerald-500 to-green-600 text-white font-bold hover:from-emerald-600 hover:to-green-700 transition-all shadow-lg shadow-emerald-500/20"
+                  >
+                    🔄 Jugar de Nuevo
+                  </motion.button>
+                )}
               </div>
 
-              <EndGameButton onEnd={() => submitScore(score)} />
+              <EndGameButton onEnd={() => {
+                if (bestScore === null || score > bestScore) {
+                  submitScore(score);
+                }
+              }} />
             </div>
           </motion.section>
 

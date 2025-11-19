@@ -50,7 +50,7 @@ export default function BattleshipRounds() {
   const [gameStarted, setGameStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
 
-  const { submitScore } = useGameScore('battleship');
+  const { submitScore, bestScore } = useGameScore('battleship');
   const { isMuted, toggleMute } = useBackgroundMusic();
 
   const startGame = () => {
@@ -68,15 +68,52 @@ export default function BattleshipRounds() {
   const shoot = useCallback(
     (r: number, c: number) => {
       if (!board || gameOver) return;
+      
+      // Verificar si ya fue golpeada antes de hacer cambios
+      if (board[r][c].hit) return;
+      
+      const wasShip = board[r][c].ship !== null;
+      const shipId = board[r][c].ship;
+      
       setBoard(prev => {
         if (!prev) return prev;
         const copy = prev.map(row => row.map(cell => ({ ...cell })));
-        if (copy[r][c].hit) return prev;
         copy[r][c].hit = true;
-        if (copy[r][c].ship !== null) setHits(h => h + 1);
-        setShots(s => s + 1);
         return copy;
       });
+      
+      // Solo incrementar shots si NO le diste a un barco
+      if (!wasShip) {
+        setShots(s => s + 1);
+      } else {
+        setHits(h => h + 1);
+        
+        // Verificar si hundió el barco completo
+        setTimeout(() => {
+          setBoard(currentBoard => {
+            if (!currentBoard) return currentBoard;
+            
+            // Verificar si todas las partes del barco fueron golpeadas
+            let shipSunk = true;
+            for (let i = 0; i < SIZE; i++) {
+              for (let j = 0; j < SIZE; j++) {
+                if (currentBoard[i][j].ship === shipId && !currentBoard[i][j].hit) {
+                  shipSunk = false;
+                  break;
+                }
+              }
+              if (!shipSunk) break;
+            }
+            
+            // Si hundió el barco, dar puntos de bonificación
+            if (shipSunk && shipId !== null) {
+              setScore(s => s + 100);
+            }
+            
+            return currentBoard;
+          });
+        }, 50);
+      }
     },
     [board, gameOver]
   );
@@ -121,8 +158,10 @@ export default function BattleshipRounds() {
   }, [shots, allSunk]);
 
   useEffect(() => {
-    if (gameOver) submitScore(score).catch(() => {});
-  }, [gameOver, score, submitScore]);
+    if (gameOver && (bestScore === null || score > bestScore)) {
+      submitScore(score).catch(() => {});
+    }
+  }, [gameOver, score, submitScore, bestScore]);
 
   // ---------- UI ----------
 
@@ -274,7 +313,13 @@ export default function BattleshipRounds() {
                       <span className="text-2xl">💀</span>
                       <span className="text-lg font-bold text-red-400">Fin del Juego</span>
                     </div>
-                    <p className="text-slate-300 text-sm">Puntaje final: {score}</p>
+                    <p className="text-slate-300 text-sm mb-4">Puntaje final: {score}</p>
+                    <button
+                      onClick={() => { setScore(0); setRound(1); restart(); }}
+                      className="w-full py-2 rounded-lg bg-linear-to-r from-blue-500 to-cyan-600 text-white font-bold hover:from-blue-600 hover:to-cyan-700 transition-all shadow-lg shadow-blue-500/20"
+                    >
+                      🔄 Jugar de Nuevo
+                    </button>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -288,7 +333,11 @@ export default function BattleshipRounds() {
                   <ArrowPathIcon className="w-5 h-5" />
                   Reiniciar
                 </button>
-                <EndGameButton onEnd={() => submitScore(score)} />
+                <EndGameButton onEnd={() => {
+                  if (bestScore === null || score > bestScore) {
+                    submitScore(score);
+                  }
+                }} />
               </div>
             </div>
 

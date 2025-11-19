@@ -8,15 +8,42 @@ import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
 
 export default function Flappy() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  
+  // Estados de React (UI)
   const [score, setScore] = useState(0);
-  const [best, setBest] = useState(() =>
-    Number(localStorage.getItem("flappy_best") || 0)
-  );
   const [running, setRunning] = useState(false);
   const [gameOver, setGameOver] = useState(false);
-  const { submitScore } = useGameScore('flappy');
+  
+  // Hooks personalizados
+  const { submitScore, bestScore } = useGameScore('flappy');
   const { isMuted, toggleMute } = useBackgroundMusic();
 
+  // --- CORRECCIÓN CRÍTICA: REFS ---
+  // Usamos referencias para 'bestScore' y 'submitScore'.
+  // Esto permite acceder al valor más reciente DENTRO del loop del juego
+  // SIN tener que añadir estas variables a las dependencias del useEffect.
+  // Si las ponemos en dependencias, el juego se reinicia cada vez que cambia el score.
+  const submitScoreRef = useRef(submitScore);
+  const bestScoreRef = useRef(bestScore);
+
+  // Mantenemos las referencias actualizadas
+  useEffect(() => {
+    submitScoreRef.current = submitScore;
+    bestScoreRef.current = bestScore;
+  }, [submitScore, bestScore]);
+
+  // --- FUNCIÓN DE REINICIO ---
+  const handleReset = () => {
+    setRunning(false);
+    setGameOver(false);
+    setScore(0);
+    // Pequeño delay para asegurar limpieza del canvas anterior
+    setTimeout(() => {
+      setRunning(true);
+    }, 50);
+  };
+
+  // --- LÓGICA DEL JUEGO ---
   useEffect(() => {
     if (!running) return;
 
@@ -42,7 +69,7 @@ export default function Flappy() {
     const pipeSpeed = 2.6;
     const gap = 100;
 
-    // Estado del juego
+    // Variables mutables del juego (No usar useState aquí para rendimiento)
     let birdY = H / 2;
     const birdX = 80;
     let vy = 0;
@@ -57,7 +84,8 @@ export default function Flappy() {
       pipes.push({ x: W + 20, gapY });
     }
 
-    function reset() {
+    // Inicialización interna
+    function initGameLoop() {
       birdY = H / 2;
       vy = 0;
       pipes = [];
@@ -65,8 +93,6 @@ export default function Flappy() {
       internalScore = 0;
       alive = true;
       spawnPipe();
-      setScore(0);
-      setGameOver(false);
     }
 
     function flap() {
@@ -75,6 +101,8 @@ export default function Flappy() {
     }
 
     function step() {
+      if (!alive) return;
+      
       tick += 1;
       if (tick % 100 === 0) spawnPipe();
 
@@ -90,16 +118,19 @@ export default function Flappy() {
         if (!p.scored && p.x + 20 < birdX) {
           p.scored = true;
           internalScore++;
-          setScore(internalScore);
+          // Actualizamos la UI, pero esto NO reinicia el efecto gracias a las deps vacías
+          setScore(internalScore); 
         }
       });
 
       // Colisiones
       for (const p of pipes) {
         const pipeW = 52;
-        if (birdX + 12 > p.x && birdX - 12 < p.x + pipeW) {
-          if (birdY - 12 < p.gapY - gap / 2 || birdY + 12 > p.gapY + gap / 2) {
+        // Hitbox reducida (10px en vez de 12) para ser más justo
+        if (birdX + 10 > p.x && birdX - 10 < p.x + pipeW) {
+          if (birdY - 10 < p.gapY - gap / 2 || birdY + 10 > p.gapY + gap / 2) {
             alive = false;
+            break;
           }
         }
       }
@@ -107,17 +138,17 @@ export default function Flappy() {
       // Suelo / techo
       if (birdY > H - 10 || birdY < 0) alive = false;
 
-      // Si muere, detener y mostrar "Game Over"
+      // Si muere
       if (!alive) {
-        setBest((b) => {
-          const nb = Math.max(b, internalScore);
-          localStorage.setItem("flappy_best", String(nb));
-          return nb;
-        });
         setGameOver(true);
-        // enviar puntuación final
-        submitScore(internalScore).catch(() => {});
-        setRunning(false);
+        
+        // Usamos las REFS para checar el score sin reiniciar el hook
+        const currentBest = bestScoreRef.current;
+        const submitFn = submitScoreRef.current;
+
+        if (currentBest === null || internalScore > currentBest) {
+          submitFn(internalScore).catch(() => {});
+        }
       }
     }
 
@@ -125,14 +156,14 @@ export default function Flappy() {
       const rect = canvas.getBoundingClientRect();
       ctx.clearRect(0, 0, rect.width, rect.height);
 
-      // Sky gradient background
+      // Fondo Cielo
       const gradient = ctx.createLinearGradient(0, 0, 0, rect.height);
       gradient.addColorStop(0, '#4facfe');
       gradient.addColorStop(1, '#00f2fe');
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, rect.width, rect.height);
 
-      // Bird (yellow with gradient)
+      // Pájaro
       const birdGradient = ctx.createRadialGradient(birdX, birdY, 3, birdX, birdY, 12);
       birdGradient.addColorStop(0, '#ffeb3b');
       birdGradient.addColorStop(1, '#ff9800');
@@ -141,13 +172,13 @@ export default function Flappy() {
       ctx.arc(birdX, birdY, 12, 0, Math.PI * 2);
       ctx.fill();
       
-      // Bird eye
+      // Ojo Pájaro
       ctx.fillStyle = '#000';
       ctx.beginPath();
       ctx.arc(birdX + 4, birdY - 2, 2, 0, Math.PI * 2);
       ctx.fill();
 
-      // Pipes (green gradient)
+      // Tubos
       pipes.forEach((p) => {
         const pipeW = 52;
         const pipeGradient = ctx.createLinearGradient(p.x, 0, p.x + pipeW, 0);
@@ -155,17 +186,12 @@ export default function Flappy() {
         pipeGradient.addColorStop(1, '#2e7d32');
         ctx.fillStyle = pipeGradient;
         
-        // Top pipe
+        // Tubo Arriba
         ctx.fillRect(p.x, 0, pipeW, p.gapY - gap / 2);
-        // Bottom pipe
-        ctx.fillRect(
-          p.x,
-          p.gapY + gap / 2,
-          pipeW,
-          rect.height - (p.gapY + gap / 2)
-        );
+        // Tubo Abajo
+        ctx.fillRect(p.x, p.gapY + gap / 2, pipeW, rect.height - (p.gapY + gap / 2));
         
-        // Pipe borders
+        // Bordes
         ctx.strokeStyle = '#1b5e20';
         ctx.lineWidth = 2;
         ctx.strokeRect(p.x, 0, pipeW, p.gapY - gap / 2);
@@ -176,7 +202,6 @@ export default function Flappy() {
     function loop() {
       step();
       draw();
-      if (alive) raf = requestAnimationFrame(loop);
     }
 
     // Controles
@@ -187,8 +212,27 @@ export default function Flappy() {
       flap();
     }
 
-    reset();
-    raf = requestAnimationFrame(loop);
+    initGameLoop();
+    
+    // Loop limitado a 60 FPS
+    let lastTime = performance.now();
+    const targetFPS = 60;
+    const frameInterval = 1000 / targetFPS;
+    
+    function limitedLoop(currentTime: number) {
+      if (!alive) return;
+      
+      raf = requestAnimationFrame(limitedLoop);
+      
+      const deltaTime = currentTime - lastTime;
+      
+      if (deltaTime >= frameInterval) {
+        lastTime = currentTime - (deltaTime % frameInterval);
+        loop();
+      }
+    }
+    
+    raf = requestAnimationFrame(limitedLoop);
     window.addEventListener("keydown", onKey);
     canvas.addEventListener("click", onClick);
 
@@ -196,9 +240,12 @@ export default function Flappy() {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
       window.removeEventListener("keydown", onKey);
-      canvas.removeEventListener("click", onClick);
+      if (canvas) canvas.removeEventListener("click", onClick);
     };
-  }, [running, best, submitScore]);
+  
+  // IMPORTANTE: La única dependencia es 'running'.
+  // Al no poner 'score' ni hooks aquí, evitamos el reinicio al puntuar.
+  }, [running]);
 
   return (
     <main className="p-8 text-slate-100 min-h-screen bg-linear-to-br from-[#050d1a] via-[#071123] to-[#0a1628]">
@@ -234,7 +281,7 @@ export default function Flappy() {
 
         <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 mb-6">
 
-          {/* LEFT: Stats & Controls */}
+          {/* IZQUIERDA: Stats & Controls */}
           <motion.section 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -260,7 +307,7 @@ export default function Flappy() {
                   <TrophyIcon className="w-5 h-5 text-orange-400" />
                 </div>
                 <div className="text-4xl font-black text-orange-300">
-                  {best}
+                  {bestScore || 0}
                 </div>
               </div>
 
@@ -284,7 +331,7 @@ export default function Flappy() {
                 )}
               </AnimatePresence>
 
-              {/* Controls */}
+              {/* Controls Info */}
               <div className="p-4 bg-slate-800/40 rounded-lg border border-slate-700/30">
                 <div className="text-sm text-slate-400 mb-2">Controles</div>
                 <div className="space-y-2 text-sm">
@@ -299,12 +346,12 @@ export default function Flappy() {
                 </div>
               </div>
 
-              {/* Action Buttons */}
+              {/* Botones de Acción */}
               {!running && (
                 <motion.button
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  onClick={() => setRunning(true)}
+                  onClick={gameOver ? handleReset : () => setRunning(true)}
                   className="w-full py-3 rounded-lg bg-linear-to-r from-yellow-500 to-orange-600 text-white font-bold hover:from-yellow-600 hover:to-orange-700 transition-all shadow-lg shadow-yellow-500/20 flex items-center justify-center gap-2"
                 >
                   {gameOver ? (
@@ -325,7 +372,7 @@ export default function Flappy() {
             </div>
           </motion.section>
 
-          {/* RIGHT: Game Canvas */}
+          {/* DERECHA: Game Canvas */}
           <motion.section 
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -360,6 +407,12 @@ export default function Flappy() {
                           <div className="text-xl text-slate-300 mb-6">
                             Puntuación final: <span className="font-bold text-yellow-400">{score}</span>
                           </div>
+                          <button
+                            onClick={handleReset}
+                            className="px-8 py-3 rounded-xl bg-linear-to-r from-yellow-500 to-orange-600 text-white font-black hover:from-yellow-600 hover:to-orange-700 transition-all shadow-2xl shadow-yellow-500/30"
+                          >
+                            🔄 Jugar de Nuevo
+                          </button>
                         </motion.div>
                       ) : (
                         <motion.div 
@@ -383,7 +436,7 @@ export default function Flappy() {
 
         </div>
 
-        {/* BOTTOM ROW: Instructions */}
+        {/* Instrucciones */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

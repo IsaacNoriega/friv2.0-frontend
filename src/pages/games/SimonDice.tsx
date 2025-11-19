@@ -22,8 +22,7 @@ export default function SimonDice() {
   const [score, setScore] = useState(0)
   const [started, setStarted] = useState(false)
   const timeoutRef = useRef<number | null>(null)
-  const bestRef = useRef<number>(Number(localStorage.getItem('simon-best') || '0'))
-  const { submitScore } = useGameScore('simon')
+  const { submitScore, bestScore } = useGameScore('simon')
   const { isMuted, toggleMute } = useBackgroundMusic();
 
   useEffect(() => {
@@ -63,12 +62,11 @@ export default function SimonDice() {
     if (idx !== sequence[playerIndex]) {
       setMessage('❌ Incorrecto, juego terminado.')
       setStarted(false)
-      if (score > bestRef.current) {
-        bestRef.current = score
-        localStorage.setItem('simon-best', String(score))
+      // Guardar el score actual (sin bonus por esta ronda porque falló)
+      const finalScore = score;
+      if (bestScore === null || finalScore > bestScore) {
+        submitScore(finalScore).catch(() => {})
       }
-      // enviar puntuación
-      submitScore(score).catch(() => {})
       return
     }
 
@@ -164,7 +162,7 @@ export default function SimonDice() {
                   {score}
                 </div>
                 <div className="text-xs text-slate-400 mt-1">
-                  Récord: {bestRef.current}
+                  Récord: {bestScore || 0}
                 </div>
               </div>
 
@@ -224,7 +222,11 @@ export default function SimonDice() {
               </div>
 
               {/* Action Button */}
-              <EndGameButton onEnd={() => submitScore(score)} />
+              <EndGameButton onEnd={() => {
+                if (bestScore === null || score > bestScore) {
+                  submitScore(score);
+                }
+              }} />
             </div>
           </motion.section>
 

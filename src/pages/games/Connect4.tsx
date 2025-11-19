@@ -339,7 +339,11 @@ export default function Connect4() {
               </div>
 
               {/* Action Button */}
-              <EndGameButton onEnd={() => submitScore(score)} />
+              <EndGameButton onEnd={() => {
+                if (bestScore === null || score > bestScore) {
+                  submitScore(score);
+                }
+              }} />
             </div>
           </motion.section>
 

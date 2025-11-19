@@ -75,11 +75,8 @@ export default function Game2048() {
     return g;
   });
   const [score, setScore] = useState(0);
-  const [best, setBest] = useState(
-    () => Number(localStorage.getItem("best2048")) || 0
-  );
   const [over, setOver] = useState(false);
-  const { submitScore } = useGameScore('2048');
+  const { submitScore, bestScore } = useGameScore('2048');
   const { isMuted, toggleMute } = useBackgroundMusic();
   const [lastMoveDir, setLastMoveDir] = useState<string | null>(null);
   const [renderVersion, setRenderVersion] = useState(0);
@@ -131,14 +128,10 @@ export default function Game2048() {
         const gain = result.scoreGain ?? 0;
         setScore((s) => {
           const newScore = s + gain;
-          if (newScore > best) {
-            setBest(newScore);
-            localStorage.setItem("best2048", String(newScore));
-            submitScore(newScore).catch(() => { });
-          }
           if (!hasMoves(withSpawn)) {
             setOver(true);
-            if (newScore <= best) {
+            // Solo guardar si es primera vez (bestScore null) o si supera el mejor puntaje
+            if (bestScore === null || newScore > bestScore) {
               submitScore(newScore).catch(() => { });
             }
           }
@@ -146,7 +139,7 @@ export default function Game2048() {
         });
       }
     },
-    [grid, best, submitScore, isMoving]
+    [grid, submitScore, isMoving, bestScore]
   );
 
   useEffect(() => {
@@ -288,7 +281,7 @@ export default function Game2048() {
                     <TrophyIcon className="w-5 h-5 text-purple-400" />
                   </div>
                   <div className="text-3xl font-black bg-linear-to-r from-purple-400 to-pink-300 bg-clip-text text-transparent">
-                    {best.toLocaleString()}
+                    {(bestScore || 0).toLocaleString()}
                   </div>
                 </div>
               </div>
@@ -327,7 +320,13 @@ export default function Game2048() {
                     <span className="text-2xl">💀</span>
                     <span className="text-lg font-bold text-red-400">Game Over</span>
                   </div>
-                  <p className="text-slate-300 text-sm">No quedan movimientos disponibles</p>
+                  <p className="text-slate-300 text-sm mb-4">No quedan movimientos disponibles</p>
+                  <button
+                    onClick={restart}
+                    className="w-full py-2 rounded-lg bg-linear-to-r from-amber-500 to-orange-600 text-white font-bold hover:from-amber-600 hover:to-orange-700 transition-all shadow-lg shadow-amber-500/20"
+                  >
+                    🔄 Jugar de Nuevo
+                  </button>
                 </motion.div>
               )}
             </div>

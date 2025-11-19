@@ -210,8 +210,20 @@ export default function Pacman() {
 
   // detect win
   useEffect(() => {
-    if (started && dotsLeft === 0 && !win) setWin(true)
-  }, [dotsLeft, started, win])
+    // Solo detectar victoria si hay dots inicialmente y ahora quedan 0
+    if (started && dotsLeft === 0 && !win && grid.length > 0) {
+      // Verificar que realmente no quedan dots en el grid
+      let actualDots = 0;
+      for (const row of grid) {
+        for (const cell of row) {
+          if (cell === '.') actualDots++;
+        }
+      }
+      if (actualDots === 0) {
+        setWin(true);
+      }
+    }
+  }, [dotsLeft, started, win, grid]);
 
   // award round bonus once
   useEffect(() => {

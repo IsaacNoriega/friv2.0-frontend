@@ -350,7 +350,11 @@ export default function Sudoku() {
                     Reiniciar
                   </button>
                 </div>
-                <EndGameButton onEnd={() => submitScore(score)} />
+                <EndGameButton onEnd={() => {
+                  if (bestScore === null || score > bestScore) {
+                    submitScore(score);
+                  }
+                }} />
               </div>
 
               {scoreError && (
