@@ -10,15 +10,20 @@ type Entry = {
 }
 
 const GAME_OPTIONS: { slug: string; label: string }[] = [
-  { slug: 'flappy', label: 'Flappy' },
   { slug: '2048', label: '2048' },
-  { slug: 'tetris', label: 'Tetris' },
-  { slug: 'pacman', label: 'Pacman' },
+  { slug: 'ahorcado', label: 'Ahorcado' },
   { slug: 'battleship', label: 'Battleship' },
-  { slug: 'simondice', label: 'Simon' },
   { slug: 'blackjack', label: 'Blackjack' },
+  { slug: 'clicker', label: 'Clicker' },
+  { slug: 'connect4', label: 'Conecta 4' },
+  { slug: 'flappy', label: 'Flappy Bird' },
   { slug: 'memorama', label: 'Memorama' },
+  { slug: 'minesweeper', label: 'Buscaminas' },
+  { slug: 'pacman', label: 'Pacman' },
+  { slug: 'simondice', label: 'Simón Dice' },
   { slug: 'snake', label: 'Snake' },
+  { slug: 'sudoku', label: 'Sudoku' },
+  { slug: 'tetris', label: 'Tetris' },
 ]
 
 export default function Ranking(){

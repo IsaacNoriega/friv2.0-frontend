@@ -18,7 +18,10 @@ function randomFood(snake: { x: number; y: number }[]) {
   while (true) {
     const x = Math.floor(Math.random() * COLS)
     const y = Math.floor(Math.random() * ROWS)
-    if (!snake.some(p => p.x === x && p.y === y)) return { x, y }
+    // Asegurar que las coordenadas estén dentro del rango válido
+    if (x >= 0 && x < COLS && y >= 0 && y < ROWS && !snake.some(p => p.x === x && p.y === y)) {
+      return { x, y }
+    }
   }
 }
 

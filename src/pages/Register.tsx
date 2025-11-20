@@ -77,7 +77,7 @@ export const RegisterComponent: React.FC = () => {
               <div>
                 <label className="text-sm text-gray-400 mb-1 block">
                   Correo electrónico
-                </label>
+ey mira                </label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 text-gray-500" size={20} />
                   <input
