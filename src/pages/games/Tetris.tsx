@@ -71,6 +71,17 @@ function cloneGrid(g: Cell[][]) {
   return g.map((r) => r.slice());
 }
 
+// 🔹 Función para crear y mezclar una nueva bolsa de piezas
+function createBag(): string[] {
+  const pieces = Object.keys(SHAPES);
+  // Algoritmo de Fisher-Yates para mezclar
+  for (let i = pieces.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pieces[i], pieces[j]] = [pieces[j], pieces[i]];
+  }
+  return pieces;
+}
+
 export default function Tetris() {
   const [grid, setGrid] = useState<Cell[][]>(() => emptyGrid());
   const [gameOver, setGameOver] = useState(false);
@@ -79,6 +90,9 @@ export default function Tetris() {
   
   const { submitScore, lastScore, bestScore } = useGameScore('tetris');
   const { isMuted, toggleMute } = useBackgroundMusic();
+
+  // 🔹 Sistema de bolsa de piezas
+  const bagRef = useRef<string[]>(createBag());
 
   useEffect(() => {
     setCurrentScore(0);
@@ -108,10 +122,15 @@ export default function Tetris() {
     return true;
   }, []);
 
-  // 🔹 Spawnea una nueva pieza
+  // 🔹 Spawnea una nueva pieza usando el sistema de bolsa
   const spawn = useCallback(() => {
-    const types = Object.keys(SHAPES);
-    const t = types[Math.floor(Math.random() * types.length)];
+    // Si la bolsa está vacía, crear una nueva
+    if (bagRef.current.length === 0) {
+      bagRef.current = createBag();
+    }
+    
+    // Sacar la siguiente pieza de la bolsa
+    const t = bagRef.current.shift()!;
     const rots = SHAPES[t];
     const rot = 0;
     const shape = rots[rot];
@@ -225,6 +244,7 @@ export default function Tetris() {
     setCurrentScore(0);
     setGameOver(false);
     pieceRef.current = null;
+    bagRef.current = createBag(); // Reiniciar la bolsa
     spawn();
   }, [spawn]);
 
