@@ -39,6 +39,7 @@ export default function Flappy() {
     setScore(0);
     // Pequeño delay para asegurar limpieza del canvas anterior
     setTimeout(() => {
+      setGameOver(false);
       setRunning(true);
     }, 50);
   };
