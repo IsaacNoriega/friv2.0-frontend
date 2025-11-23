@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrophyIcon, FireIcon, SparklesIcon, PlayIcon, ArrowPathIcon, CheckCircleIcon, SpeakerWaveIcon, SpeakerXMarkIcon } from '@heroicons/react/24/solid';
 import GameInstructions from '../../components/GameInstructions'
