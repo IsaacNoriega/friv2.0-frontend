@@ -223,46 +223,53 @@ export default function Snake() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <div 
+            <div
               ref={gameRef}
               tabIndex={0}
               className="bg-slate-900/40 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-6 h-full flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-lime-500/50"
             >
               <div
-                style={{ gridTemplateColumns: `repeat(${COLS}, 1fr)` }}
-                className="grid gap-0.5 border-2 border-lime-600/30 rounded-lg overflow-hidden shadow-2xl shadow-lime-500/20"
+                className="w-full max-w-[480px] aspect-[20/12] sm:max-w-[600px] md:max-w-[700px] lg:max-w-[800px] flex items-center justify-center"
               >
-                {Array.from({ length: ROWS }).map((_, r) =>
-                  Array.from({ length: COLS }).map((__, c) => {
-                    const isSnake = snake.some(s => s.x === c && s.y === r)
-                    const isHead = snake[0].x === c && snake[0].y === r
-                    const isFood = food.x === c && food.y === r
-
-                    const baseColor = (r + c) % 2 === 0 ? 'bg-slate-800/60' : 'bg-slate-800/40'
-
-                    return (
-                      <motion.div
-                        key={`${r}-${c}`}
-                        initial={isFood ? { scale: 0 } : undefined}
-                        animate={isFood ? { scale: 1 } : undefined}
-                        className={`
-                          w-full aspect-square flex items-center justify-center text-lg
-                          ${
-                            isFood
-                              ? 'bg-red-500 shadow-lg shadow-red-500/50'
-                              : isHead
-                              ? 'bg-linear-to-br from-lime-400 to-green-500 shadow-lg shadow-lime-500/50'
-                              : isSnake
-                              ? 'bg-linear-to-br from-lime-500 to-green-600'
-                              : baseColor
-                          }
-                        `}
-                      >
-                        {isFood ? '🍎' : ''}
-                      </motion.div>
-                    )
-                  })
-                )}
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: `repeat(${COLS}, 1fr)`,
+                    gridTemplateRows: `repeat(${ROWS}, 1fr)`,
+                    width: '100%',
+                    height: '100%',
+                  }}
+                  className="w-full h-full gap-0.5 border-2 border-lime-600/30 rounded-lg overflow-hidden shadow-2xl shadow-lime-500/20 bg-black"
+                >
+                  {Array.from({ length: ROWS }).map((_, r) =>
+                    Array.from({ length: COLS }).map((__, c) => {
+                      const isSnake = snake.some(s => s.x === c && s.y === r)
+                      const isHead = snake[0].x === c && snake[0].y === r
+                      const isFood = food.x === c && food.y === r
+                      const baseColor = (r + c) % 2 === 0 ? 'bg-slate-800/60' : 'bg-slate-800/40'
+                      return (
+                        <motion.div
+                          key={`${r}-${c}`}
+                          initial={isFood ? { scale: 0 } : undefined}
+                          animate={isFood ? { scale: 1 } : undefined}
+                          className={`w-full h-full aspect-square flex items-center justify-center text-lg
+                            ${
+                              isFood
+                                ? 'bg-red-500 shadow-lg shadow-red-500/50'
+                                : isHead
+                                ? 'bg-linear-to-br from-lime-400 to-green-500 shadow-lg shadow-lime-500/50'
+                                : isSnake
+                                ? 'bg-linear-to-br from-lime-500 to-green-600'
+                                : baseColor
+                            }
+                          `}
+                        >
+                          {isFood ? '🍎' : ''}
+                        </motion.div>
+                      )
+                    })
+                  )}
+                </div>
               </div>
             </div>
           </motion.section>

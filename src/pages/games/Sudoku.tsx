@@ -6,60 +6,14 @@ import { EndGameButton } from '../../components/EndGameButton';
 import { useGameScore } from '../../hooks/useGameScore';
 import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
 
-// ✅ Lista de puzzles por ronda (PUEDES AGREGAR MÁS)
-const PUZZLES: number[][][] = [
-  [
-    [5,3,0,0,7,0,0,0,0],
-    [6,0,0,1,9,5,0,0,0],
-    [0,9,8,0,0,0,0,6,0],
-    [8,0,0,0,6,0,0,0,3],
-    [4,0,0,8,0,3,0,0,1],
-    [7,0,3,0,2,0,0,0,6],
-    [0,6,0,0,0,0,2,8,0],
-    [0,0,0,4,1,9,0,0,5],
-    [0,0,0,0,8,0,0,7,9]
-  ],
-  // 👉 RONDA 2 (ejemplo, puedes editarlo)
-  [
-    [0,0,4,0,0,0,1,0,0],
-    [0,0,0,4,1,0,0,0,0],
-    [9,0,0,0,0,0,0,6,0],
-    [0,7,0,0,6,0,0,0,3],
-    [0,0,0,0,0,3,0,0,8],
-    [5,0,0,0,0,0,0,0,0],
-    [0,9,0,0,0,0,0,0,0],
-    [0,0,0,0,1,0,0,0,7],
-    [0,0,6,3,0,0,0,5,0]
-  ],
-]
 
-// ✅ Soluciones correspondientes a los puzzles
-const SOLUTIONS: number[][][] = [
-  [
-    [5,3,4,6,7,8,9,1,2],
-    [6,7,2,1,9,5,3,4,8],
-    [1,9,8,3,4,2,5,6,7],
-    [8,5,9,7,6,1,4,2,3],
-    [4,2,6,8,5,3,7,9,1],
-    [7,1,3,9,2,4,8,5,6],
-    [9,6,1,5,3,7,2,8,4],
-    [2,8,7,4,1,9,6,3,5],
-    [3,4,5,2,8,6,1,7,9]
-  ],
-
-  // 👉 SOLUCIÓN DE RONDA 2 (ejemplo)
-  [
-    [3,6,4,2,9,8,1,7,5],
-    [8,5,9,4,1,6,3,2,0],
-    [9,1,7,5,3,0,8,6,4],
-    [2,7,8,1,6,5,9,4,3],
-    [6,4,1,9,2,3,5,0,8],
-    [5,3,0,8,0,7,6,1,2],
-    [7,9,3,6,5,1,4,8,0],
-    [4,8,2,0,1,9,0,3,7],
-    [1,0,6,3,8,2,7,5,9]
-  ],
-]
+// API: https://you-do-sudoku-api.vercel.app/api
+async function fetchSudoku() {
+  const res = await fetch('https://you-do-sudoku-api.vercel.app/api');
+  const data = await res.json();
+  // data: { puzzle: number[][], solution: number[][] }
+  return data;
+}
 
 // ----- utils -----
 function cloneGrid(g: number[][]) {
@@ -119,12 +73,15 @@ function findConflicts(grid: number[][]) {
 }
 
 export default function Sudoku() {
-  const [grid, setGrid] = useState<number[][]>(() => cloneGrid(PUZZLES[0]))
+  const [grid, setGrid] = useState<number[][]>([])
+  const [solution, setSolution] = useState<number[][]>([])
   const [conflicts, setConflicts] = useState<Set<string>>(new Set())
   const [score, setScore] = useState(0)
   const [level, setLevel] = useState(1)
   const [won, setWon] = useState(false)
   const [started, setStarted] = useState(false)
+  const [feedback, setFeedback] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
   const { submitScore, error: scoreError, bestScore } = useGameScore('sudoku')
   const { isMuted, toggleMute } = useBackgroundMusic()
 
@@ -137,6 +94,23 @@ export default function Sudoku() {
     setGrid(g)
   }
 
+  // Obtener un nuevo tablero de la API
+  async function getNewPuzzle() {
+    setLoading(true);
+    setFeedback(null);
+    try {
+      const data = await fetchSudoku();
+      setGrid(cloneGrid(data.puzzle));
+      setSolution(cloneGrid(data.solution));
+      setConflicts(new Set());
+      setWon(false);
+    } catch {
+      setFeedback('Error al obtener tablero. Intenta de nuevo.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   // ✅ Revisar sudoku
   function check() {
     const conf = findConflicts(grid)
@@ -144,49 +118,55 @@ export default function Sudoku() {
 
     const allFilled = grid.flat().every(v => v > 0)
 
-    if (conf.size === 0 && allFilled) {
-      setWon(true)
+    // Validar contra la solución
+    const isCorrect = allFilled && conf.size === 0 && solution.length && grid.flat().every((v, i) => v === solution.flat()[i]);
 
+    if (isCorrect) {
+      setWon(true)
+      setFeedback('¡Correcto! Sudoku resuelto.');
       const bonus = level * 100
       setScore(prev => prev + bonus)
-
-      // si es récord, guardar
       if (score + bonus > (bestScore || 0)) {
         submitScore(score + bonus).catch(console.error)
       }
-
-      // esperar y pasar de ronda
-      setTimeout(nextRound, 1200)
+      setTimeout(() => {
+        setFeedback(null);
+        nextRound();
+      }, 1200)
+    } else if (conf.size > 0) {
+      setFeedback('Hay errores en el tablero. Revisa los números marcados.');
+      setTimeout(() => setFeedback(null), 2000);
+    } else if (!allFilled) {
+      setFeedback('Completa todos los espacios antes de verificar.');
+      setTimeout(() => setFeedback(null), 2000);
     }
   }
 
   // ✅ Pasar al siguiente puzzle
-  function nextRound() {
-    if (level >= PUZZLES.length) {
-      alert("🎉 Completaste todos los niveles!")
-      return restart()
-    }
-
-    const next = level + 1
-    setLevel(next)
-    setGrid(cloneGrid(PUZZLES[next - 1]))
-    setConflicts(new Set())
-    setWon(false)
+  async function nextRound() {
+    setLevel(lvl => lvl + 1);
+    await getNewPuzzle();
   }
 
   function solve() {
-    setGrid(cloneGrid(SOLUTIONS[level - 1]))
+    setGrid(cloneGrid(solution));
     setConflicts(new Set())
   }
 
-  function restart() {
+  async function restart() {
     setLevel(1)
-    setGrid(cloneGrid(PUZZLES[0]))
-    setConflicts(new Set())
     setScore(0)
     setWon(false)
     setStarted(false)
+    await getNewPuzzle();
   }
+
+  // Primer render: obtener puzzle
+  React.useEffect(() => {
+    if (started && grid.length === 0) {
+      getNewPuzzle();
+    }
+  }, [started]);
 
   if (!started) {
     return (
@@ -204,10 +184,12 @@ export default function Sudoku() {
           <button
             onClick={() => setStarted(true)}
             className="px-8 py-4 rounded-xl bg-linear-to-r from-purple-500 to-pink-600 text-white text-lg font-black hover:from-purple-600 hover:to-pink-700 transition-all shadow-2xl shadow-purple-500/30 flex items-center justify-center gap-2 mx-auto"
+            disabled={loading}
           >
             <PlayIcon className="w-5 h-5" />
-            Empezar Juego
+            {loading ? 'Cargando...' : 'Empezar Juego'}
           </button>
+          {feedback && <div className="mt-4 text-red-400 font-bold">{feedback}</div>}
         </motion.div>
       </main>
     );
@@ -246,6 +228,18 @@ export default function Sudoku() {
         </motion.header>
 
         <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 mb-6">
+          {/* Feedback visual */}
+          {feedback && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className={`mb-4 px-4 py-3 rounded-lg text-center font-bold text-lg shadow-lg
+                ${feedback.includes('Correcto') ? 'bg-green-500/20 text-green-300 border border-green-400/40' : 'bg-red-500/20 text-red-300 border border-red-400/40'}`}
+            >
+              {feedback}
+            </motion.div>
+          )}
 
           {/* LEFT: Stats & Controls */}
           <motion.section 
